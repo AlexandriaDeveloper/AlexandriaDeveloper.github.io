@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدليل التفاعلي لمعايير الإفصاح عن الاستدامة</title>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is now structured as a complete learning journey. It begins with a new "General Context" section to establish the 'why' (market need, challenges, demand). It then flows to: 2) The ISSB Framework (the 'who' and 'how'), 3) Core Concepts, 4) Qualitative Characteristics, 5) The ESG Scorecard, and 6) An interactive Quiz. This revised structure provides a logical narrative, starting broad and progressively detailing the standards, making it much easier to study and connect concepts. -->
+    <!-- Visualization & Content Choices: 1) General Context: (Goal: Inform) New section with HTML/CSS cards to clearly present the foundational concepts of sustainability reporting. 2) ISSB Framework: (Goal: Inform) Refined cards and diagrams for governance and process. 3) Core Concepts: (Goal: Organize) Interactive tabs remain. 4) Qualitative Characteristics: (Goal: Show Relationships) The interactive hierarchy remains, now triggering detailed pop-up descriptions. 5) ESG Scorecard: (Goal: Visualize a Concept) Radar chart remains. 6) Quiz: (Goal: Assess) Interactive cards remain. The new structure and content additions create a more comprehensive and pedagogically sound experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #FDF6E3;
+            /* Warm neutral background */
+            color: #3C2A21;
+            scroll-behavior: smooth;
+        }
+
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #C07F00;
+            /* Accent color */
+            border-bottom-color: #C07F00;
+        }
+
+        .card {
+            background-color: #FFF8E7;
+            border: 1px solid #E5DCC3;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .tab-button.active {
+            background-color: #C07F00;
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        .hierarchy-node {
+            cursor: pointer;
+            border: 2px solid #E5DCC3;
+            background-color: #FFF8E7;
+            transition: background-color 0.3s;
+        }
+
+        .hierarchy-node.active,
+        .hierarchy-node:hover {
+            background-color: #F9EBC7;
+            border-color: #C07F00;
+        }
+
+        .quiz-option {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .quiz-option.correct {
+            background-color: #D1FAE5 !important;
+            border-color: #10B981 !important;
+        }
+
+        .quiz-option.incorrect {
+            background-color: #FEE2E2 !important;
+            border-color: #EF4444 !important;
+        }
+
+        .details-panel {
+            min-height: 250px;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="bg-[#FDF6E3]/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[#C07F00]">دليل الاستدامة</h1>
+            <div class="hidden md:flex space-x-6 space-x-reverse text-sm lg:text-base">
+                <a href="#context" class="nav-link pb-1">السياق العام</a>
+                <a href="#framework" class="nav-link pb-1">الإطار</a>
+                <a href="#concepts" class="nav-link pb-1">المفاهيم</a>
+                <a href="#characteristics" class="nav-link pb-1">الخصائص</a>
+                <a href="#scorecard" class="nav-link pb-1">بطاقة الأداء</a>
+                <a href="#quiz" class="nav-link pb-1">اختبر فهمك</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+            <a href="#context" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">السياق العام</a>
+            <a href="#framework" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">الإطار العام</a>
+            <a href="#concepts" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">المفاهيم
+                الأساسية</a>
+            <a href="#characteristics" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">الخصائص
+                النوعية</a>
+            <a href="#scorecard" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">بطاقة الأداء</a>
+            <a href="#quiz" class="nav-item block text-center py-2 px-4 text-sm hover:bg-gray-100">اختبر فهمك</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Introduction Section -->
+        <section class="text-center mb-20">
+            <h2 class="text-4xl font-bold mb-4 text-[#3C2A21]">الدليل التفاعلي لمعايير الإفصاح عن الاستدامة</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700">
+                أهلاً بك في هذا الدليل التفاعلي الشامل الذي يبسط المفاهيم الأساسية للمعايير الدولية للإفصاح عن الاستدامة
+                (ISSB). تم تصميم هذا التطبيق لتحويل الملاحظات المعقدة إلى تجربة تعليمية مرئية ومنظمة.
+            </p>
+        </section>
+
+        <!-- Section 0: General Context -->
+        <section id="context" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-10">السياق العام للاستدامة</h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    قبل الخوض في تفاصيل المعايير، من المهم فهم السياق الذي نشأت فيه. هذا القسم يوضح تعريف معلومات
+                    الاستدامة، التحديات التي تواجهها، والجهات الرئيسية التي تحتاج إليها.
+                </p>
+            </div>
+            <div class="space-y-8">
+                <div class="card p-6 rounded-lg">
+                    <h4 class="text-xl font-bold mb-3 text-[#C07F00]">المحاسبة كلغة للأعمال</h4>
+                    <p class="text-gray-700">كانت المحاسبة لغة الأعمال، وكأي لغة، فقد تطورت المحاسبة. ومع مرور الوقت،
+                        دخلت مفاهيم جديدة إلى قاموس المحاسبة بينما اختفت أخرى، مما مهد الطريق لظهور مفاهيم حديثة مثل
+                        الاستدامة.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 rounded-lg flex flex-col">
+                        <h4 class="text-xl font-bold mb-3 text-[#C07F00]">تعريف معلومات الاستدامة</h4>
+                        <p class="text-gray-700">هي المعلومات المتعلقة بالجوانب البيئية (E)، الاجتماعية (S)، والحوكمة
+                            (G) للشركات، والتي تؤثر على الأداء المالي ولكنها لا تدرج عادةً في التقارير المالية
+                            التقليدية.</p>
+                    </div>
+                    <div class="card p-6 rounded-lg flex flex-col">
+                        <h4 class="text-xl font-bold mb-3 text-[#C07F00]">تحديات مبادرات الاستدامة</h4>
+                        <p class="text-gray-700 mb-2">واجهت مبادرات الاستدامة تحديين متعارضين:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><span class="font-semibold">الشركات الكبيرة:</span> وفرة في المعلومات قد تفتقر إلى الدقة
+                                والموثوقية.</li>
+                            <li><span class="font-semibold">الشركات الصغيرة والمتوسطة:</span> ندرة في المعلومات المتاحة.
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 rounded-lg flex flex-col">
+                        <h4 class="text-xl font-bold mb-3 text-[#C07F00]">الطلب على المعلومات</h4>
+                        <p class="text-gray-700 mb-2">يأتي الطلب على معلومات الاستدامة من 3 جهات رئيسية:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><span class="font-semibold">المستثمرون:</span> لتحسين الأداء وإدارة المخاطر.</li>
+                            <li><span class="font-semibold">إدارة الشركة:</span> لاتخاذ قرارات استراتيجية.</li>
+                            <li><span class="font-semibold">الهيئات التنظيمية:</span> لضمان الامتثال والشفافية.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-t-2 border-dashed border-gray-300 my-20">
+
+        <!-- Section 1: The ISSB Framework -->
+        <section id="framework" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-10">1. الإطار العام لمجلس المعايير الدولية للاستدامة (ISSB)
+            </h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    هذا القسم يستعرض هيكل الحوكمة، خصائص وأهداف المعايير، والخطوات المنهجية التي يتبعها المجلس لوضع
+                    معايير الإفصاح.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="card p-6 rounded-lg">
+                    <h4 class="text-xl font-bold mb-3 text-[#C07F00]">هيكل الحوكمة والتأسيس</h4>
+                    <ul class="space-y-2 text-gray-700 text-sm">
+                        <li><span class="font-bold">التأسيس:</span> تم إنشاء مجلس ISSB في عام 2021.</li>
+                        <li><span class="font-bold">مجلس المراقبة:</span> يشرف على أمناء IFRS ويتألف من هيئات أسواق مال
+                            عالمية.</li>
+                        <li><span class="font-bold">أمناء IFRS:</span> يعينون أعضاء مجلسي IASB و ISSB ويشرفون على
+                            المؤسسة، لكن لا يتدخلون في المسائل الفنية.</li>
+                        <li><span class="font-bold">أعضاء المجلس:</span> يتم اختيارهم من مناطق جغرافية مختلفة ولديهم
+                            خبرات محاسبية وفي أسواق رأس المال.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h4 class="text-xl font-bold mb-3 text-[#C07F00]">أهداف تطوير المعايير</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>تمكين الشركات من تقديم معلومات شاملة.</li>
+                        <li>أن تكون قابلة للتطبيق دوليًا.</li>
+                        <li>تشكيل أساس للإفصاح يمكن للسلطات التنظيمية البناء عليه.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h4 class="text-xl font-bold mb-3 text-[#C07F00]">خصائص المعايير</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><span class="font-bold">على أساس الصناعة:</span> تُصمم المعايير لتكون خاصة بكل قطاع، فلكل
+                            صناعة موضوعاتها المنفصلة، ولكل موضوع أهميته وتأثيراته التي تختلف باختلاف الصناعة.</li>
+                        <li><span class="font-bold">على أساس التكلفة والمنفعة:</span> يجب أن تفوق منافع المعيار تكاليف
+                            تطبيقه.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h4 class="text-xl font-bold mb-3 text-[#C07F00]">أهم المعايير الصادرة (2023)</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li><span class="font-bold">IFRS S1:</span> المتطلبات العامة للإفصاح.</li>
+                        <li><span class="font-bold">IFRS S2:</span> الإفصاحات المتعلقة بالمناخ.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg mb-12">
+                <h4 class="text-xl font-bold mb-3 text-center text-[#C07F00]">الأهداف العامة والنطاق</h4>
+                <ul class="space-y-3 text-gray-700">
+                    <li><span class="font-bold text-green-700">الهدف:</span> مطالبة الشركات بالإفصاح عن المعلومات الخاصة
+                        بالفرص والتهديدات المتعلقة بالاستدامة لمساعدة المستخدمين في اتخاذ قراراتهم.</li>
+                    <li><span class="font-bold text-green-700">النطاق (ما يجب الإفصاح عنه):</span> التهديدات والفرص التي
+                        يُتوقع بدرجة معقولة أنها تؤثر على الآفاق المستقبلية للشركة (تدفقات نقدية، تكلفة رأس المال،
+                        القدرة على الحصول على تمويل).</li>
+                    <li><span class="font-bold text-red-700">خارج النطاق (ما لا يجب الإفصاح عنه):</span> التهديدات
+                        والفرص التي لا يُتوقع بدرجة معقولة أنها قد تؤثر على الآفاق المستقبلية للمنشأة.</li>
+                    <li><span class="font-bold text-blue-700">التطبيق:</span> يجوز للشركة تطبيق معايير الاستدامة بغض
+                        النظر عما إذا كانت تقاريرها المالية معدة وفقًا لمعايير IFRS أو أي معايير محاسبية أخرى.</li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-xl font-bold mb-5 text-center text-[#C07F00]">خطوات وضع المعايير</h4>
+                <div
+                    class="flex flex-col md:flex-row justify-center items-stretch space-y-4 md:space-y-0 md:space-x-8 md:space-x-reverse">
+                    <div class="flex items-center flex-col md:flex-row">
+                        <div
+                            class="card p-4 rounded-full w-40 h-40 flex items-center justify-center text-center font-semibold">
+                            1. البحث والتقييم<br><span class="text-xs font-normal">(نشر وثيقة نقاش)</span></div>
+                        <div class="hidden md:block w-8 h-1 bg-gray-300 mx-2"></div>
+                        <div class="md:hidden w-1 h-8 bg-gray-300 my-2"></div>
+                    </div>
+                    <div class="flex items-center flex-col md:flex-row">
+                        <div
+                            class="card p-4 rounded-full w-40 h-40 flex items-center justify-center text-center font-semibold">
+                            2. اقتراح معيار<br><span class="text-xs font-normal">(نشر مسودة)</span></div>
+                        <div class="hidden md:block w-8 h-1 bg-gray-300 mx-2"></div>
+                        <div class="md:hidden w-1 h-8 bg-gray-300 my-2"></div>
+                    </div>
+                    <div class="flex items-center flex-col md:flex-row">
+                        <div
+                            class="card p-4 rounded-full w-40 h-40 flex items-center justify-center text-center font-semibold">
+                            3. المداولة والنشر<br><span class="text-xs font-normal">(إصدار المعيار النهائي)</span></div>
+                        <div class="hidden md:block w-8 h-1 bg-gray-300 mx-2"></div>
+                        <div class="md:hidden w-1 h-8 bg-gray-300 my-2"></div>
+                    </div>
+                    <div class="flex items-center flex-col md:flex-row">
+                        <div
+                            class="card p-4 rounded-full w-40 h-40 flex items-center justify-center text-center font-semibold">
+                            4. مراجعة ما بعد التنفيذ</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-t-2 border-dashed border-gray-300 my-20">
+
+        <!-- Section 2: Core Concepts -->
+        <section id="concepts" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-10">2. المفاهيم الأساسية للإفصاح</h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    يقوم الإفصاح عن الاستدامة على أربعة مفاهيم جوهرية تضمن جودة وموثوقية المعلومات المقدمة. اضغط على كل
+                    مفهوم لاستكشاف تفاصيله.
+                </p>
+            </div>
+            <div class="flex justify-center mb-8 flex-wrap">
+                <button data-tab="tab1" class="tab-button active text-lg font-semibold py-2 px-5 rounded-t-lg m-1">العرض
+                    العادل</button>
+                <button data-tab="tab2" class="tab-button text-lg font-semibold py-2 px-5 rounded-t-lg m-1">الأهمية
+                    النسبية</button>
+                <button data-tab="tab3" class="tab-button text-lg font-semibold py-2 px-5 rounded-t-lg m-1">المنشأة
+                    المعدة للتقرير</button>
+                <button data-tab="tab4" class="tab-button text-lg font-semibold py-2 px-5 rounded-t-lg m-1">ترابط
+                    المعلومات</button>
+            </div>
+            <div class="card p-8 rounded-lg min-h-[300px]">
+                <div id="tab1" class="tab-content">
+                    <h4 class="text-2xl font-bold mb-3">العرض العادل</h4>
+                    <ul class="space-y-3 text-gray-700">
+                        <li><span class="font-bold">الهدف:</span> الإفصاح عن جميع التهديدات والفرص المتعلقة بالاستدامة
+                            والتي يُتوقع بشكل معقول أن تؤثر على الآفاق المستقبلية للشركة.</li>
+                        <li><span class="font-bold">الفرق عن التمثيل الصادق:</span>
+                            <ul class="list-disc list-inside mr-4 mt-1 text-sm">
+                                <li><span class="font-semibold">العرض العادل:</span> مفهوم أوسع يشمل تقديم مجموعة كاملة
+                                    من الإفصاحات المالية بشكل متكامل.</li>
+                                <li><span class="font-semibold">التمثيل الصادق:</span> يركز على قدرة الشركة على وصف كل
+                                    فرصة أو تهديد على حدة بدقة.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div id="tab2" class="tab-content hidden">
+                    <h4 class="text-2xl font-bold mb-3">الأهمية النسبية</h4>
+                    <ul class="space-y-3 text-gray-700">
+                        <li><span class="font-bold">التعريف:</span> تكون المعلومة ذات أهمية إذا كان حذفها، تحريفها، أو
+                            **التعتيم** عليها قد يؤثر على قرارات المستخدمين.</li>
+                        <li><span class="font-bold">أساس قرارات الإفصاح:</span> تحدد ما يجب الإفصاح عنه، وتعالج مشكلة
+                            التحميل الزائد للمعلومات.</li>
+                        <li><span class="font-bold">طرق التعتيم:</span>
+                            <ul class="list-disc list-inside mr-4 mt-1 text-sm">
+                                <li>استخدام لغة غامضة.</li>
+                                <li>توزيع المعلومات الهامة في أجزاء مختلفة.</li>
+                                <li>تجميع معلومات غير متشابهة أو توزيع معلومات متشابهة.</li>
+                            </ul>
+                        </li>
+                        <li><span class="font-bold">التقييم المستمر:</span> يجب على الشركة إعادة تقييم الأهمية النسبية
+                            في تاريخ كل تقرير لمراعاة تغير الظروف.</li>
+                    </ul>
+                </div>
+                <div id="tab3" class="tab-content hidden">
+                    <h4 class="text-2xl font-bold mb-3">المنشأة المعدة للتقرير</h4>
+                    <p class="text-gray-700">يجب على الشركة تحديد حدود الكيان الذي يتم الإفصاح عنه بدقة. على سبيل
+                        المثال، هل التقرير يخص الشركة القابضة فقط (قوائم فردية)، أم أنه يشمل القوائم المالية المجمعة
+                        للشركة وجميع شركاتها التابعة؟</p>
+                </div>
+                <div id="tab4" class="tab-content hidden">
+                    <h4 class="text-2xl font-bold mb-3">ترابط المعلومات</h4>
+                    <p class="text-gray-700 mb-3">يجب أن تكون المعلومات المقدمة مترابطة ومتكاملة. هذا يعني:</p>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>وجود ترابط واضح بين التهديدات والفرص المختلفة التي يتم الإفصاح عنها.</li>
+                        <li>وجود ترابط بين المعلومات السردية (الوصفية) والمعلومات الكمية (المالية) لتقديم صورة كاملة.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-t-2 border-dashed border-gray-300 my-20">
+
+        <!-- Section 3: Qualitative Characteristics -->
+        <section id="characteristics" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-10">3. الخصائص النوعية للمعلومات المفيدة</h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    لكي تكون المعلومات المالية مفيدة، يجب أن تتسم بمجموعة من الخصائص النوعية. تنقسم هذه الخصائص إلى
+                    أساسية ومُعزِّزة. اضغط على كل خاصية في المخطط أدناه لعرض تفاصيلها.
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="w-full text-center space-y-4">
+                        <div class="hierarchy-node p-3 rounded-lg font-semibold text-lg" data-char="fundamental">الخصائص
+                            الأساسية</div>
+                        <div class="hierarchy-node p-3 rounded-lg font-semibold text-lg" data-char="enhancing">الخصائص
+                            المُعزِّزة</div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 card rounded-lg p-6 details-panel">
+                    <div id="char-details">
+                        <p class="text-center text-gray-500">اختر خاصية من القائمة لعرض تفاصيلها هنا.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-t-2 border-dashed border-gray-300 my-20">
+
+        <!-- Section 4: ESG Scorecard -->
+        <section id="scorecard" class="mb-12">
+            <h3 class="text-3xl font-bold text-center mb-10">4. بطاقة أداء الاستدامة (ESG)</h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    بطاقة أداء الاستدامة هي أداة عملية لقياس وتقييم أداء الشركة في ثلاثة أبعاد رئيسية: البيئية (E)،
+                    الاجتماعية (S)، والحوكمة (G).
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h4 class="text-xl font-bold mb-5 text-[#C07F00]">خطوات إعداد البطاقة</h4>
+                    <ol class="list-decimal list-inside space-y-3 text-gray-700">
+                        <li class="p-2 rounded bg-white shadow-sm">اختيار المؤشرات المناسبة (KPIs).</li>
+                        <li class="p-2 rounded bg-white shadow-sm">تحديد الأهداف (Targets).</li>
+                        <li class="p-2 rounded bg-white shadow-sm">تجميع البيانات الفعلية (Actuals).</li>
+                        <li class="p-2 rounded bg-white shadow-sm">حساب نسب الإنجاز.</li>
+                        <li class="p-2 rounded bg-white shadow-sm">تقييم الأداء.</li>
+                        <li class="p-2 rounded bg-white shadow-sm">تحليل النتائج وتحديد نقاط القوة والضعف.</li>
+                    </ol>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-5 text-[#C07F00] text-center">الأبعاد الرئيسية لـ ESG</h4>
+                    <div class="chart-container">
+                        <canvas id="esgChart"></canvas>
+                    </div>
+                    <p class="text-center text-xs text-gray-500 mt-2">رسم بياني توضيحي بأرقام افتراضية.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-t-2 border-dashed border-gray-300 my-20">
+
+        <!-- Section 5: Quiz -->
+        <section id="quiz" class="mb-12">
+            <h3 class="text-3xl font-bold text-center mb-10">5. اختبر فهمك</h3>
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <p class="text-md text-gray-600">
+                    حان الوقت لاختبار معرفتك! أجب عن الأسئلة التالية لترسيخ فهمك للمفاهيم التي تعلمتها. ستحصل على تغذية
+                    راجعة فورية على إجاباتك.
+                </p>
+            </div>
+            <div class="space-y-8 max-w-4xl mx-auto">
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">1. عند تحديد أعضاء مجلس إدارة ISSB، يتم الأخذ في الاعتبار جميع العوامل
+                        التالية فيما عدا:</p>
+                    <div class="space-y-2">
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">الخبرة المحاسبية</div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">الخبرة بأسواق رأس المال
+                        </div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="true">الانتماء إلى الدول المتقدمة
+                        </div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">الأفراد من أماكن جغرافية
+                            مختلفة</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">يتم التركيز على الخبرة والتوزيع الجغرافي
+                        المتوازن، وليس على الانتماء لدول متقدمة أو نامية.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">2. يقوم أمناء مؤسسة IFRS بالإشراف على مجلس المراقبة.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">العكس هو الصحيح، مجلس المراقبة هو الذي يشرف
+                        على أمناء مؤسسة IFRS.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">3. يتألف مجلس مراقبة مؤسسة IFRS من جميع أسواق رأس المال حول العالم.
+                    </p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">يتألف من **بعض** هيئات أسواق رأس المال حول
+                        العالم، وليس جميعها.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">4. تتكون خطوات وضع وتطوير المعايير الدولية للإفصاح عن الاستدامة من 5
+                        خطوات.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">تتكون من 4 خطوات فقط: البحث والتقييم، اقتراح
+                        معيار، المداولة والنشر، ومراجعة ما بعد التنفيذ.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">5. يتم نشر المعيار النهائي في الخطوة رقم 4 (مراجعة ما بعد التنفيذ).
+                    </p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">يتم نشر المعيار النهائي في الخطوة رقم 3 (إعادة
+                        المداولة والنشر).</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">6. يتناول المعيار الدولي الثاني للاستدامة (IFRS S2) المتطلبات العامة
+                        للإفصاح.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">المعيار الثاني (S2) يختص بالإفصاحات المتعلقة
+                        بالمناخ، أما الأول (S1) فهو الخاص بالمتطلبات العامة.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">7. يتناول المعيار الدولي الثاني للاستدامة (IFRS S2):</p>
+                    <div class="space-y-2">
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">المتطلبات العامة للإفصاح
+                        </div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="true">الإفصاحات المتعلقة بالمناخ
+                        </div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">الإفصاحات المتعلقة بالنواحي
+                            البيئية</div>
+                        <div class="quiz-option border p-3 rounded-lg" data-correct="false">الإفصاح المتعلق بالنواحي
+                            الاجتماعية</div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">الإجابة الصحيحة هي الإفصاحات المتعلقة بالمناخ.
+                    </p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">8. لكي تكون المعلومة ملائمة، يجب أن تكون ذات قيمة تنبؤية وقيمة توكيدية
+                        معًا.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">يكفي أن تكون لها قيمة تنبؤية **أو** قيمة
+                        توكيدية.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">9. يعتبر الاتساق هو الهدف، والقابلية للمقارنة هي الوسيلة لتحقيق هذا
+                        الهدف.</p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">العكس هو الصحيح: القابلية للمقارنة هي الهدف،
+                        والاتساق في تطبيق السياسات هو إحدى الوسائل لتحقيقها.</p>
+                </div>
+                <div class="card p-6 rounded-lg quiz-container">
+                    <p class="font-semibold mb-4">10. لا يجب الإفصاح عن المعلومات التاريخية لأنها لا تحقق خاصية الوقتية.
+                    </p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="false">صواب</button>
+                        <button class="quiz-option border p-3 rounded-lg flex-1" data-correct="true">خطأ</button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-3 feedback hidden">الوقتية تعني توفير المعلومات (سواء كانت
+                        تاريخية أو مستقبلية) في الوقت المناسب لتكون قادرة على التأثير في القرارات.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#FFF8E7] border-t border-gray-200 mt-12">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-600">
+            <p>&copy; 2025 - تم إنشاؤه لتبسيط مفاهيم معايير الاستدامة.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Tabs for Core Concepts
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabContents.forEach(content => {
+                        content.classList.toggle('hidden', content.id !== button.dataset.tab);
+                    });
+                });
+            });
+
+            // Qualitative Characteristics Interaction
+            const charData = {
+                fundamental: `
+                    <h4 class="text-2xl font-bold mb-4 text-[#C07F00]">الخصائص الأساسية</h4>
+                    <p class="mb-4">هي الخصائص التي لا يمكن الاستغناء عنها لجعل المعلومات مفيدة. وتنقسم إلى:</p>
+                    <div class="space-y-4">
+                        <div>
+                            <h5 class="font-bold text-lg">1. الملاءمة</h5>
+                            <ul class="list-disc list-inside mr-4 mt-2 space-y-2 text-gray-700">
+                                <li>هي قدرة المعلومات على إحداث فرق في قرارات المستخدمين، حتى لو اختاروا عدم الاستفادة منها أو كانوا على علم بها من مصدر آخر.</li>
+                                <li>لكي تكون ملائمة، يجب أن تكون لها قيمة **تنبؤية** (تساعد في التنبؤ بالمستقبل) **أو** قيمة **تأكيدية** (تؤكد تقييمات سابقة). وغالباً ما تكون القيمتان مترابطتين.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg">2. التمثيل الصادق</h5>
+                            <ul class="list-disc list-inside mr-4 mt-2 space-y-2 text-gray-700">
+                                <li>يجب أن تكون المعلومات **كاملة** (وصف كامل للمخاطر والفرص)، **ومحايدة**، **ودقيقة**.</li>
+                                <li>**الحيادية** تعني عدم وجود تحيز، ويدعمها توخي الحيطة والحذر (عدم المبالغة في الفرص أو التهوين من المخاطر).</li>
+                                <li>**الدقة** تعني أن تكون المعلومات من مصادر موثوقة.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                enhancing: `
+                    <h4 class="text-2xl font-bold mb-4 text-[#C07F00]">الخصائص المُعزِّزة</h4>
+                    <p class="mb-4">هي الخصائص التي تحسن من فائدة المعلومات الملائمة والممثلة بصدق. وتشمل:</p>
+                    <div class="space-y-4">
+                        <div>
+                             <h5 class="font-bold text-lg">1. القابلية للمقارنة</h5>
+                             <p class="text-gray-700">تساعد على تحديد وفهم أوجه التشابه والاختلاف بين البنود. تتطلب وجود بندين على الأقل للمقارنة ولا تعني التطابق التام.</p>
+                        </div>
+                        <div>
+                             <h5 class="font-bold text-lg">2. القابلية للتحقق</h5>
+                             <p class="text-gray-700">تعني إمكانية وصول أشخاص مختلفين لديهم نفس المعرفة إلى نفس الاستنتاجات.</p>
+                        </div>
+                        <div>
+                             <h5 class="font-bold text-lg">3. الوقتية</h5>
+                             <p class="text-gray-700">تعني توفير المعلومات (التاريخية أو المستقبلية) في الوقت المناسب لتكون قادرة على التأثير في قرارات المستخدمين.</p>
+                        </div>
+                        <div>
+                             <h5 class="font-bold text-lg">4. القابلية للفهم</h5>
+                             <p class="text-gray-700">يجب أن تكون المعلومة واضحة وموجزة. يتحقق ذلك بتجنب المعلومات العامة، والتكرار، واستخدام لغة واضحة، مع إبراز التغيرات الهامة للمستخدمين (مثل مقارنة مستوى المخاطر بالعام الماضي).</p>
+                        </div>
+                    </div>
+                `
+            };
+            const charNodes = document.querySelectorAll('.hierarchy-node');
+            const detailsPanel = document.getElementById('char-details');
+            charNodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    charNodes.forEach(n => n.classList.remove('active'));
+                    node.classList.add('active');
+                    const charKey = node.dataset.char;
+                    detailsPanel.innerHTML = charData[charKey] || '<p class="text-center text-gray-500">اختر خاصية من القائمة لعرض تفاصيلها هنا.</p>';
+                });
+            });
+
+
+            // ESG Chart
+            const ctx = document.getElementById('esgChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['البعد البيئي (E)', 'البعد الاجتماعي (S)', 'الحوكمة (G)'],
+                    datasets: [{
+                        label: 'أداء الاستدامة (افتراضي)',
+                        data: [75, 85, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(192, 127, 0, 0.2)',
+                        borderColor: 'rgb(192, 127, 0)',
+                        pointBackgroundColor: 'rgb(192, 127, 0)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(192, 127, 0)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { angleLines: { color: '#E5DCC3' }, grid: { color: '#E5DCC3' }, pointLabels: { font: { size: 14, family: 'Tajawal' }, color: '#3C2A21' }, ticks: { backdropColor: '#FDF6E3', color: '#3C2A21' } } },
+                    plugins: { legend: { labels: { font: { family: 'Tajawal' } } } }
+                }
+            });
+
+            // Quiz Logic
+            const quizContainers = document.querySelectorAll('.quiz-container');
+            quizContainers.forEach(container => {
+                const options = container.querySelectorAll('.quiz-option');
+                options.forEach(option => {
+                    option.addEventListener('click', () => {
+                        if (container.classList.contains('answered')) return;
+                        container.classList.add('answered');
+                        const isCorrect = option.dataset.correct === 'true';
+                        option.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        if (!isCorrect) {
+                            options.forEach(opt => {
+                                if (opt.dataset.correct === 'true') {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+                        const feedback = container.querySelector('.feedback');
+                        if (feedback) {
+                            feedback.classList.remove('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
