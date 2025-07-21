@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Fundamentals Exam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Professional Blue -->
+    <!-- Application Structure Plan: The application is now a timed exam. The structure is sequential: 1) A start screen with instructions. 2) The main exam screen, which displays one question at a time with multiple-choice answers, a progress bar, and a countdown timer. 3) A results screen showing the final score, time taken, and a button to retry. This structure was chosen to create a formal testing environment, focusing the user on a single question at a time and adding the pressure of a time limit, which is a complete shift from the previous exploratory flashcard model. -->
+    <!-- Visualization & Content Choices: Report Info: 42 Q&A pairs on computer fundamentals. -> Goal: Assess knowledge under time constraints. -> Viz/Presentation Method: A sequential, single-question view with a timer and progress bar. -> Interaction: Users select one answer and click "Next". The app provides immediate visual feedback (correct/incorrect) before moving on. -> Justification: This linear flow is standard for exams and effectively tests recall and speed. The timer adds a challenge element, and the final score provides clear performance feedback. -> Library/Method: Vanilla JS for all logic (timer, question handling, scoring). Tailwind CSS for layout and styling. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .option-btn.selected {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .option-btn.correct {
+            background-color: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .option-btn.incorrect {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+
+    <div id="start-screen" class="min-h-screen flex flex-col items-center justify-center text-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg w-full">
+            <h1 class="text-3xl font-bold text-slate-700">Computer Fundamentals Exam</h1>
+            <p class="mt-4 text-slate-600">
+                أهلاً بك في اختبار أساسيات الحاسب.
+                <br>
+                لديك 25 دقيقة لإكمال 42 سؤالاً. اضغط على "بدء الاختبار" عندما تكون مستعدًا.
+            </p>
+            <button id="start-btn"
+                class="mt-8 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                بدء الاختبار
+            </button>
+        </div>
+    </div>
+
+    <div id="exam-screen" class="hidden min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg max-w-3xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <div id="progress-text" class="text-sm font-semibold text-slate-500"></div>
+                <div id="timer" class="text-lg font-bold text-blue-600"></div>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+
+            <div id="question-container" class="text-center">
+                <h2 id="question-en" class="text-xl md:text-2xl font-bold mb-2"></h2>
+                <h3 id="question-ar" class="text-lg md:text-xl text-slate-600 mb-6"></h3>
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+            </div>
+
+            <button id="next-btn"
+                class="mt-8 w-full bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-colors hidden">
+                السؤال التالي
+            </button>
+        </div>
+    </div>
+
+    <div id="results-screen" class="hidden min-h-screen flex flex-col items-center justify-center text-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg w-full">
+            <h1 class="text-3xl font-bold text-slate-700">انتهى الاختبار!</h1>
+            <div class="mt-6 text-lg">
+                <p class="text-slate-600">نتيجتك النهائية هي:</p>
+                <p id="score-text" class="text-5xl font-bold text-blue-600 my-4"></p>
+                <p id="time-taken-text" class="text-slate-500"></p>
+            </div>
+            <button id="retry-btn"
+                class="mt-8 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                إعادة المحاولة
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { question_en: "The user interface that relies on writing commands to computers is referred to as GUI.", question_ar: "واجهة المستخدم التي تعتمد على كتابة الأوامر إلى أجهزة الكمبيوتر تسمى GUI.", options: ["True", "False"], correct: "False" },
+            { question_en: "The user interface that relies on writing commands to computers is referred to as CLI.", question_ar: "واجهة المستخدم التي تعتمد على كتابة الأوامر إلى أجهزة الكمبيوتر تسمى CLI.", options: ["True", "False"], correct: "True" },
+            { question_en: "User interface to give command for computer is GUI.", question_ar: "واجهة المستخدم لإعطاء الأوامر للكمبيوتر هي GUI.", options: ["True", "False"], correct: "True" },
+            { question_en: "Windows 11 include ability to run Android applications and games directly.", question_ar: "يتضمن ويندوز 11 القدرة على تشغيل تطبيقات وألعاب الأندرويد مباشرة.", options: ["True", "False"], correct: "True" },
+            { question_en: "Who is the founder of Microsoft Corporation?", question_ar: "من هو مؤسس شركة ميكروسوفت؟", options: ["Steve Jobs", "Bill Gates and Paul Allen", "Linus Torvalds", "Jeff Bezos"], correct: "Bill Gates and Paul Allen" },
+            { question_en: "The hard disk is the main secondary storage device in a computer system.", question_ar: "القرص الصلب هو جهاز التخزين الثانوي الرئيسي في نظام الكمبيوتر.", options: ["True", "False"], correct: "True" },
+            { question_en: "A computer can operate without an operating system but cannot operate without application software.", question_ar: "يمكن للكمبيوتر أن يعمل بدون نظام تشغيل ولكن لا يمكنه العمل بدون برامج تطبيقية.", options: ["True", "False"], correct: "False" },
+            { question_en: "OneDrive offers 1TB of free storage space per user.", question_ar: "يوفر ون درايف مساحة تخزين مجانية تبلغ 1 تيرابايت لكل مستخدم.", options: ["True", "False"], correct: "False" },
+            { question_en: "To count the duration of performing a task, use...", question_ar: "لحساب مدة تنفيذ المهمة، استخدم...", options: ["Calendar", "Notepad", "Stopwatch", "Calculator"], correct: "Stopwatch" },
+            { question_en: "An electronic memory that contains information that is useful in the initial operation of the device.", question_ar: "ذاكرة إلكترونية تحتوي على معلومات مفيدة في التشغيل الأولي للجهاز.", options: ["RAM", "CPU", "HDD", "ROM"], correct: "ROM" },
+            { question_en: "Permanent Memory Computer devices are an electronic chip that has the ability to store information temporarily.", question_ar: "أجهزة الذاكرة الدائمة في الحاسب هي شريحة إلكترونية لديها القدرة على تخزين المعلومات بشكل مؤقت.", options: ["True", "False"], correct: "False" },
+            { question_en: "The ... system is an example of a multitasking program.", question_ar: "نظام ... هو مثال لبرنامج متعدد المهام.", options: ["MS-DOS", "Mac OS", "A single-tasking calculator", "BIOS"], correct: "Mac OS" },
+            { question_en: "The larger the size of the RAM, the faster the computer.", question_ar: "كلما زاد حجم ذاكرة الوصول العشوائي (RAM)، كلما كان الكمبيوتر أسرع.", options: ["True", "False"], correct: "True" },
+            { question_en: "Computer software is divided into ...", question_ar: "تنقسم برامج الكمبيوتر إلى ...", options: ["One type", "Two types", "Three types", "Four types"], correct: "Two types" },
+            { question_en: "Windows system enjoys a high degree of freedom to modify, operate, distribute and develop its parts.", question_ar: "يتمتع نظام ويندوز بدرجة عالية من الحرية في التعديل والتشغيل والتوزيع والتطوير على أجزائه.", options: ["True", "False"], correct: "False" },
+            { question_en: "All these software applications are provided by Microsoft except ...", question_ar: "يتم توفير كافة هذه التطبيقات البرمجية بواسطة مايكروسوفت باستثناء ...", options: ["Word", "Excel", "Google Drive", "PowerPoint"], correct: "Google Drive" },
+            { question_en: "Analog computers are a combination of an analog and digital computers.", question_ar: "أجهزة الكمبيوتر التناظرية عبارة عن مزيج من أجهزة الكمبيوتر التناظرية والرقمية.", options: ["True", "False"], correct: "False" },
+            { question_en: "The memory unit is considered the brain of a computer.", question_ar: "تعتبر وحدة الذاكرة عقل الكمبيوتر.", options: ["True", "False"], correct: "False" },
+            { question_en: "The arithmetic and logic unit are in the central processing unit.", question_ar: "توجد وحدة الحساب والمنطق في وحدة المعالجة المركزية.", options: ["True", "False"], correct: "True" },
+            { question_en: "The application used for planning events is...", question_ar: "التطبيق المستخدم للتخطيط للأحداث هو...", options: ["Stopwatch", "Calendar", "Notepad", "Paint"], correct: "Calendar" },
+            { question_en: "... types of hard disks store data on flash memory.", question_ar: "أنواع الأقراص الصلبة ... تقوم بتخزين البيانات على ذاكرة وميضية.", options: ["HDD", "SSD", "CD-ROM", "DVD"], correct: "SSD" },
+            { question_en: "A metal box that contains almost all of the basic computer components is...", question_ar: "صندوق معدني يحتوي على جميع مكونات الكمبيوتر الأساسية تقريبًا هو...", options: ["The Power Supply", "The Monitor", "The System unit", "The Keyboard"], correct: "The System unit" },
+            { question_en: "... is a volatile memory.", question_ar: "... هي ذاكرة متطايرة.", options: ["ROM", "SSD", "RAM", "HDD"], correct: "RAM" },
+            { question_en: "The process by which you can achieve a specific idea or solve a problem by dividing it into successive steps is...", question_ar: "العملية التي يمكنك من خلالها تحقيق فكرة معينة أو حل مشكلة ما، وذلك من خلال تقسيمها إلى خطوات متتالية هي...", options: ["Networking", "Browsing", "Programming", "Gaming"], correct: "Programming" },
+            { question_en: "One of the most important features of the Windows 10 operating system is the voice assistant Cortana, the Microsoft Edge browser and the presence of graphical Start menu.", question_ar: "من أهم مميزات نظام التشغيل ويندوز 10 وجود المساعد الصوتي كورتانا ومتصفح مايكروسوفت إيدج وقائمة ابدأ الرسومية.", options: ["True", "False"], correct: "True" },
+            { question_en: "Microsoft released its first version of the Windows operating system in ...", question_ar: "قدمت شركة مايكروسوفت أول إصداراتها من نظام التشغيل ويندوز في ...", options: ["1995", "1985", "2001", "1981"], correct: "1985" },
+            { question_en: "A password can be created using a picture.", question_ar: "يمكن إنشاء كلمة مرور بواسطة صورة.", options: ["True", "False"], correct: "True" },
+            { question_en: "Windows is an open-source Linux-based operating system developed by Google.", question_ar: "الويندوز هو نظام تشغيل مفتوح المصدر يستند إلى لينكس تم تطويره بواسطة جوجل.", options: ["True", "False"], correct: "False" },
+            { question_en: "Any program whose tasks cause some kind of damage to system is...", question_ar: "أي برنامج تؤدي مهامه إلى إحداث نوع من الضرر للنظام هو...", options: ["An Operating System", "Malware", "An antivirus", "A driver"], correct: "Malware" },
+            { question_en: "A hard disk covered with a magnetic layer is...", question_ar: "قرص صلب مغطى بطبقة مغناطيسية هو...", options: ["SSD", "RAM", "ROM", "HDD"], correct: "HDD" },
+            { question_en: "The name of the file or folder is changed using the key ...", question_ar: "يتم تغيير اسم الملف أو المجلد عن طريق مفتاح ...", options: ["F1", "F5", "F2", "Esc"], correct: "F2" },
+            { question_en: "All functions keys do the same functions in all programs.", question_ar: "تقوم جميع مفاتيح الوظائف بنفس الوظائف في جميع البرامج.", options: ["True", "False"], correct: "False" },
+            { question_en: "The physical components of a computer can be seen and touched, unlike the software components.", question_ar: "يمكن رؤية المكونات المادية للكمبيوتر ولمسها، على عكس المكونات البرمجية.", options: ["True", "False"], correct: "True" },
+            { question_en: "The physical components of a computer include the system unit and software.", question_ar: "المكونات المادية لجهاز الكمبيوتر تشمل وحدة النظام والبرمجيات.", options: ["True", "False"], correct: "False" },
+            { question_en: "Once you turn off the computer or cut off the power, RAM loses all its contents.", question_ar: "بمجرد إيقاف تشغيل الكمبيوتر أو قطع الطاقة، تفقد RAM جميع محتوياتها.", options: ["True", "False"], correct: "True" },
+            { question_en: "Once you turn off the computer or cut off the power, ROM loses all its contents.", question_ar: "بمجرد إيقاف تشغيل الكمبيوتر أو قطع الطاقة، تفقد ROM جميع محتوياتها.", options: ["True", "False"], correct: "False" },
+            { question_en: "Analog computer uses binary numbers.", question_ar: "يستخدم الكمبيوتر التناظري الأرقام الثنائية.", options: ["True", "False"], correct: "False" },
+            { question_en: "Type of computer that uses binary number is...", question_ar: "نوع الكمبيوتر الذي يستخدم الرقم الثنائي هو...", options: ["Analog computer", "Digital computer", "Hybrid computer", "Quantum computer"], correct: "Digital computer" },
+            { question_en: "Analogue computers are designed to work on digital data that is presented in the form of binary numbers.", question_ar: "صُممت أجهزة الكمبيوتر التناظرية للعمل على البيانات الرقمية التي يتم تقديمها في شكل أرقام ثنائية.", options: ["True", "False"], correct: "False" },
+            { question_en: "The metal part that contains most of computer parts is the System unit.", question_ar: "الجزء المعدني الذي يحتوي على معظم أجزاء الكمبيوتر هو وحدة النظام.", options: ["True", "False"], correct: "True" },
+            { question_en: "The metal part that contains most of computer parts is the Power unit.", question_ar: "الجزء المعدني الذي يحتوي على معظم أجزاء الكمبيوتر هو وحدة الطاقة.", options: ["True", "False"], correct: "False" },
+            { question_en: "To copy files and folders, you use...", question_ar: "لنسخ الملفات والمجلدات، تستخدم...", options: ["CTRL + X", "CTRL + V", "CTRL + C", "CTRL + P"], correct: "CTRL + C" }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const examScreen = document.getElementById('exam-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const retryBtn = document.getElementById('retry-btn');
+
+        const questionEnElem = document.getElementById('question-en');
+        const questionArElem = document.getElementById('question-ar');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const timerElem = document.getElementById('timer');
+        const scoreText = document.getElementById('score-text');
+        const timeTakenText = document.getElementById('time-taken-text');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let userAnswers = [];
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            timeLeft = 25 * 60;
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            examScreen.classList.remove('hidden');
+            displayQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElem.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function displayQuestion() {
+            nextBtn.classList.add('hidden');
+            const question = quizData[currentQuestionIndex];
+            questionEnElem.textContent = question.question_en;
+            questionArElem.textContent = question.question_ar;
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-btn w-full text-left p-4 border-2 border-slate-300 rounded-lg hover:bg-slate-100 transition-colors';
+                button.onclick = () => selectAnswer(button, option, question.correct);
+                optionsContainer.appendChild(button);
+            });
+
+            updateProgress();
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            // Disable all buttons after one is clicked
+            const buttons = optionsContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            button.classList.add('selected');
+            userAnswers[currentQuestionIndex] = selectedOption;
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                button.classList.add('correct');
+            } else {
+                button.classList.add('incorrect');
+                // Highlight the correct answer
+                buttons.forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            nextBtn.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            progressText.textContent = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+            const progressPercentage = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        function showResults() {
+            clearInterval(timer);
+            examScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+
+            scoreText.textContent = `${score} / ${quizData.length}`;
+
+            const totalTime = 25 * 60;
+            const timeTaken = totalTime - timeLeft;
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            timeTakenText.textContent = `الوقت المستغرق: ${minutes} دقيقة و ${seconds} ثانية`;
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', nextQuestion);
+        retryBtn.addEventListener('click', startQuiz);
+    </script>
+</body>
+
+</html>
