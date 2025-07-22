@@ -49,7 +49,7 @@
             <h1 class="text-3xl font-bold text-slate-900 mb-4">Word Processing Test</h1>
             <p class="text-slate-600 mb-2">This quiz is based on questions from the "Tahrir Sinai" file, in their
                 original order.</p>
-            <p class="text-slate-600 mb-6">You have <strong class="text-sky-600">12 minutes</strong> to answer 68
+            <p class="text-slate-600 mb-6">You have <strong class="text-sky-600">25 minutes</strong> to answer 68
                 questions.</p>
             <button id="start-btn"
                 class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-600 transition-colors duration-300 text-lg">
@@ -62,7 +62,7 @@
             <div class="bg-white p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-4">
                     <div id="timer" class="text-lg font-bold bg-slate-200 text-slate-800 px-4 py-2 rounded-lg">
-                        Time: 12:00
+                        Time: 25:00
                     </div>
                     <div id="progress" class="text-sm font-semibold text-slate-500">
                         Question 1 / 68
@@ -175,7 +175,7 @@
         ];
 
         const QUIZ_LENGTH = allQuestions.length;
-        const QUIZ_TIME = 720; // 12 minutes in seconds
+        const QUIZ_TIME = 1500; // 25 minutes in seconds
 
         let questions = [];
         let currentQuestionIndex = 0;
@@ -237,6 +237,14 @@
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
+            /**
+             * Starts the timer countdown for the quiz.
+             * @param {number} timeLeft The amount of time left in the quiz.
+             * @param {HTMLElement} timerEl The element to display the timer text in.
+             * @param {boolean} showResultsOnTimeout Whether to show the results screen
+             *  immediately when the timer runs out, or wait for the user to answer
+             *  the current question.
+             */
             return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
         }
 
