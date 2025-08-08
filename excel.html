@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار Excel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .answer-btn.correct {
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
+        }
+
+        .answer-btn.incorrect {
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اختبار مهارات Excel</h1>
+            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 67 سؤالاً. لديك 25 دقيقة.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">اختر ترتيب الأسئلة:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">بالترتيب</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">عشوائي</button>
+                </div>
+            </div>
+
+            <button id="start-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                ابدأ الاختبار
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/67</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                السؤال التالي
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اكتمل الاختبار!</h1>
+            <p class="text-gray-600 mb-6">هذه هي نتيجتك:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">نتيجتك:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
+            </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                إعادة الاختبار
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "A green triangle will appear beside a cell if the cell is a 'text format' while it contains numbers.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يظهر المثلث الأخضر كعلامة خطأ بسيطة لتنبيهك بأن الرقم تم تخزينه كنص، مما قد يمنع استخدامه في العمليات الحسابية." },
+            { question: "The user can be prevented from creating a layout or a macro, moving or copying worksheets, or making any modifications, whether deleting or adding.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يمكن تحقيق ذلك باستخدام 'حماية المصنف' (Protect Workbook) التي تحمي هيكل الملف." },
+            { question: "You can change the values or the cells content from horizontal to vertical using paste special.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: خيار 'تبديل الموضع' (Transpose) في 'لصق خاص' يقوم بتبديل الصفوف والأعمدة." },
+            { question: "The NOW function returns the serial number for the current date.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الدالة NOW() تُرجع التاريخ والوقت الحاليين معًا. الدالة التي تُرجع التاريخ فقط هي TODAY()." },
+            { question: "Using a cell reference instead of dealing with the cell value directly in the formula allows the formula to automatically update its result by updating the cell value.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه هي الميزة الأساسية لاستخدام مراجع الخلايا؛ فهي تجعل الصيغ ديناميكية." },
+            { question: "Excel allows merging more than one worksheet, and thus calculations can be performed across these sheets.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يمكن ربط أوراق العمل معًا باستخدام صيغ ثلاثية الأبعاد (3D formulas) لإجراء عمليات حسابية عبرها." },
+            { question: "To move the chart to a new sheet or another file, choose 'move chart' from the 'Design' tab.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: عند تحديد المخطط، يظهر تبويب 'تصميم المخطط' الذي يحتوي على خيار 'نقل المخطط'." },
+            { question: "You can control the content of a cell through...", answers: [{ text: "Data validation", correct: true }, { text: "Conditional formatting", correct: false }, { text: "Filters", correct: false }], explanation: "التفسير: 'التحقق من صحة البيانات' (Data Validation) يُستخدم لتقييد نوع البيانات أو القيم التي يمكن للمستخدمين إدخالها في خلية." },
+            { question: "You can modify the formatting of cell content through ... tab.", answers: [{ text: "Home", correct: true }, { text: "Data", correct: false }, { text: "Formulas", correct: false }], explanation: "التفسير: تبويب 'الشريط الرئيسي' (Home) يحتوي على جميع أدوات التنسيق الأساسية مثل الخط، المحاذاة، والأرقام." },
+            { question: "To move a chart to another worksheet, go to the tab ...", answers: [{ text: "Design", correct: true }, { text: "Format", correct: false }, { text: "Insert", correct: false }], explanation: "التفسير: خيار 'نقل المخطط' موجود في تبويب 'تصميم المخطط' السياقي." },
+            { question: "To insert a dropdown list in a cell, you must have a cells range including the options to appear in the dropdown list.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يتم إنشاء القائمة المنسدلة باستخدام 'التحقق من صحة البيانات' وتحديد 'قائمة' كمصدر، والتي تشير إلى نطاق من الخلايا." },
+            { question: "Excel provides the conversion of numbers in a specific table into a chart in order to facilitate reading data and quickly reach results.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: المخططات هي أداة قوية لتصور البيانات وتحليلها بشكل أسرع من قراءة الأرقام." },
+            { question: "You can also name the range by selecting the range then from the Data tab, in the Defined Names group, choose the Define Name command.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: مجموعة 'الأسماء المعرفة' (Defined Names) موجودة في تبويب 'الصيغ' (Formulas) وليس 'البيانات'." },
+            { question: "To calculate the number of passed students in a range, you use the following function...", answers: [{ text: "COUNTIF(F3:F6, \"passed\")", correct: true }, { text: "COUNT(F3:F6)", correct: false }, { text: "SUMIF(F3:F6, \"passed\")", correct: false }], explanation: "التفسير: الدالة COUNTIF تُستخدم لعد الخلايا التي تفي بشرط معين (في هذه الحالة، الخلايا التي تحتوي على كلمة 'passed')." },
+            { question: "The Proper function belongs to ... function.", answers: [{ text: "Text", correct: true }, { text: "Mathematical", correct: false }, { text: "Logical", correct: false }], explanation: "التفسير: الدالة PROPER تتعامل مع السلاسل النصية لجعل الحرف الأول من كل كلمة كبيرًا." },
+            { question: "The Round function belongs to ... function.", answers: [{ text: "Mathematical", correct: true }, { text: "Text", correct: false }, { text: "Date & Time", correct: false }], explanation: "التفسير: الدالة ROUND تُستخدم لتقريب الأرقام، وهي عملية رياضية." },
+            { question: "To select a row in a range of cells in the worksheet, choose...", answers: [{ text: "CTRL+SHIFT+Arrow Key", correct: true }, { text: "CTRL+A", correct: false }, { text: "SHIFT+Space", correct: false }], explanation: "التفسير: SHIFT+Space يحدد الصف بأكمله. CTRL+SHIFT+Arrow يحدد نطاقًا من الخلايا حتى نهاية البيانات في ذلك الاتجاه." },
+            { question: "To select a range of cells in the worksheet, choose...", answers: [{ text: "CTRL+SHIFT+END", correct: true }, { text: "CTRL+A", correct: false }, { text: "SHIFT+Click", correct: false }], explanation: "التفسير: هذا الاختصار يحدد جميع الخلايا من الخلية النشطة حتى نهاية ورقة العمل المستخدمة." },
+            { question: "In the protected workbook, the user can be prevented from creating a layout or a macro, moving or copying worksheets, or making any modifications, whether deleting or adding.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: 'حماية المصنف' (Protect Workbook) مصممة خصيصًا لحماية هيكل الملف ومنع التغييرات الهيكلية." },
+            { question: "The Proper function belongs to Mathematical function.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الدالة PROPER هي دالة نصية، حيث تقوم بتغيير حالة الأحرف في النص." },
+            { question: "To distinguish between a relative cell reference and an absolute cell reference we use...", answers: [{ text: "$", correct: true }, { text: "&", correct: false }, { text: "#", correct: false }], explanation: "التفسير: علامة الدولار ($) تُستخدم لتثبيت مرجع العمود أو الصف (أو كليهما) عند نسخ الصيغة." },
+            { question: "There are 2 types of references, relative reference and percentage reference.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: النوعان الرئيسيان هما المراجع النسبية (Relative) والمطلقة (Absolute). هناك أيضًا مراجع مختلطة (Mixed)." },
+            { question: "Two worksheets can be linked together and the results displayed on a third worksheet.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يمكن للصيغ أن تشير إلى خلايا في أوراق عمل أخرى، مما يسمح بربط البيانات وعرض النتائج في أي مكان." },
+            { question: "To transfer an image from one worksheet to another by moving.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'النقل' (Moving) ليس مصطلحًا قياسيًا. يمكنك 'القص' (Cut) و'اللصق' (Paste) أو السحب والإفلات." },
+            { question: "A new row can be inserted into the worksheet by right-clicking on the row name.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: النقر بزر الماوس الأيمن على رقم الصف يفتح قائمة سياقية تحتوي على خيار 'إدراج'." },
+            { question: "To insert a row or column, select the row or column.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: لإدراج صف جديد، يجب تحديد الصف الذي تريد إدراج الصف الجديد فوقه. لإدراج عمود، حدد العمود الذي تريد إدراج العمود الجديد على يساره." },
+            { question: "You can move between the different comments in a worksheet by pressing...", answers: [{ text: "Review", correct: true }, { text: "View", correct: false }, { text: "Home", correct: false }], explanation: "التفسير: تبويب 'مراجعة' (Review) يحتوي على مجموعة 'التعليقات' التي بها أزرار 'التالي' و 'السابق' للتنقل." },
+            { question: "When using the SUBTOTAL function, we will notice on the right side there are ... levels.", answers: [{ text: "Three", correct: true }, { text: "Two", correct: false }, { text: "Four", correct: false }], explanation: "التفسير: عند استخدام أداة 'الإجمالي الفرعي' (Subtotal)، يتم إنشاء ثلاثة مستويات للتجميع: الإجمالي الكلي، والمجاميع الفرعية، والتفاصيل الكاملة." },
+            { question: "The chart can be moved to a new worksheet or another file using the Chart Move options on the ... tab.", answers: [{ text: "Design", correct: true }, { text: "Format", correct: false }, { text: "Data", correct: false }], explanation: "التفسير: خيار 'نقل المخطط' موجود في تبويب 'تصميم المخطط' السياقي." },
+            { question: "In Excel what can't be secured against password protecting a sheet?", answers: [{ text: "Unauthorized users can open the sheet", correct: true }, { text: "Editing cells", correct: false }, { text: "Formatting cells", correct: false }], explanation: "التفسير: حماية الورقة تمنع التعديلات داخل الورقة، لكنها لا تمنع فتح الملف نفسه." },
+            { question: "Open windows can be switched through the Page Layout tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: خيار 'تبديل النوافذ' (Switch Windows) موجود في تبويب 'عرض' (View)." },
+            { question: "The RANDBETWEEN function, a new random integer is returned each time the worksheet is recalculated.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه الدالة متقلبة (volatile)، مما يعني أنها تُحدّث قيمتها مع كل تغيير في ورقة العمل." },
+            { question: "The LOWER function converts all uppercase letters to lowercase.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو الغرض الأساسي من الدالة LOWER." },
+            { question: "Cell locking or hiding formulas will not be activated until the workbook or the worksheet is protected.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: خاصية 'القفل' (Locked) تكون مفعلة افتراضيًا، لكنها لا تدخل حيز التنفيذ إلا بعد تطبيق 'حماية الورقة' (Protect Sheet)." },
+            { question: "Conditional format can be applied through the Insert tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'التنسيق الشرطي' (Conditional Formatting) موجود في تبويب 'الشريط الرئيسي' (Home)." },
+            { question: "The function ... searches for a value written in a cell, then recalls its data in a specific column.", answers: [{ text: "VLOOKUP", correct: true }, { text: "MATCH", correct: false }, { text: "INDEX", correct: false }], explanation: "التفسير: الدالة VLOOKUP (البحث العمودي) مصممة للبحث عن قيمة في العمود الأول من جدول وإرجاع قيمة مقابلة من عمود آخر." },
+            { question: "The function ... searches for a value written in a cell, then recalls its order in a specific column.", answers: [{ text: "MATCH", correct: true }, { text: "VLOOKUP", correct: false }, { text: "INDEX", correct: false }], explanation: "التفسير: الدالة MATCH تُستخدم للعثور على موضع (ترتيب) قيمة معينة ضمن نطاق." },
+            { question: "Zooming the workbook in and out is done from the Review tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: أدوات التكبير والتصغير موجودة في تبويب 'عرض' (View) وكذلك في شريط المعلومات السفلي." },
+            { question: "The range L11:N15 contains 15 cells.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: النطاق يحتوي على 3 أعمدة (L, M, N) و 5 صفوف (11, 12, 13, 14, 15). حاصل الضرب 3 * 5 = 15." },
+            { question: "The... function converts the first letter of each word in a text string to an uppercase letter.", answers: [{ text: "Proper", correct: true }, { text: "Upper", correct: false }, { text: "Lower", correct: false }], explanation: "التفسير: الدالة PROPER مصممة خصيصًا لهذا الغرض (Proper Case)." },
+            { question: "We show or hide gridlines from the ... tab.", answers: [{ text: "Page layout", correct: true }, { text: "Home", correct: false }, { text: "Data", correct: false }], explanation: "التفسير: تبويب 'تخطيط الصفحة' (Page Layout) و 'عرض' (View) كلاهما يحتويان على خيارات لإظهار أو إخفاء خطوط الشبكة." },
+            { question: "We show or hide gridlines from the ... tab.", answers: [{ text: "View", correct: true }, { text: "Home", correct: false }, { text: "Data", correct: false }], explanation: "التفسير: تبويب 'عرض' (View) يحتوي على مربع اختيار لإظهار أو إخفاء خطوط الشبكة على الشاشة." },
+            { question: "The ... function is used to count the number of cells containing a numeric or text value.", answers: [{ text: "COUNTA", correct: true }, { text: "COUNT", correct: false }, { text: "COUNTBLANK", correct: false }], explanation: "التفسير: الدالة COUNTA (Count All) تعد جميع الخلايا غير الفارغة، بغض النظر عن محتواها." },
+            { question: "Cells that contain digital data can be counted using function...", answers: [{ text: "COUNT", correct: true }, { text: "COUNTA", correct: false }, { text: "SUM", correct: false }], explanation: "التفسير: الدالة COUNT تعد الخلايا التي تحتوي على أرقام فقط." },
+            { question: "The chart should have a title that explains the overall content of the chart, and usually, this title is located at the bottom of the chart.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: بشكل افتراضي، يتم وضع عنوان المخطط في الأعلى ليكون أول ما يراه المستخدم." },
+            { question: "We can exclude the third part of the SUMIF equation if the conditional range is the same as the sum range.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: إذا كان النطاق الذي تريد التحقق من الشرط فيه هو نفسه النطاق الذي تريد جمعه، فإن الوسيط الثالث (sum_range) يكون اختياريًا." },
+            { question: "You can set some rows to be repeated at the top while printing via...", answers: [{ text: "Print titles", correct: true }, { text: "Header/Footer", correct: false }, { text: "Page Setup", correct: false }], explanation: "التفسير: خيار 'طباعة العناوين' (Print Titles) في تبويب 'تخطيط الصفحة' مصمم خصيصًا لتكرار صفوف أو أعمدة معينة في كل صفحة مطبوعة." },
+            { question: "The error.... appears when the equation needs to be corrected.", answers: [{ text: "#NAME?", correct: true }, { text: "#VALUE!", correct: false }, { text: "#REF!", correct: false }], explanation: "التفسير: يظهر الخطأ #NAME? عندما لا يتعرف Excel على نص في صيغة، مثل اسم دالة مكتوب بشكل خاطئ." },
+            { question: "When auto-filling numbers, we only enter one value.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: لإنشاء تسلسل (مثل 1, 2, 3)، تحتاج إلى إدخال قيمتين على الأقل (مثل 1 و 2) حتى يفهم Excel النمط." },
+            { question: "You can change the values or the cells content from horizontal to vertical using ..... tab.", answers: [{ text: "Home", correct: true }, { text: "Data", correct: false }, { text: "Insert", correct: false }], explanation: "التفسير: يتم ذلك من خلال خيار 'لصق خاص' (Paste Special) الموجود في تبويب 'الشريط الرئيسي' (Home)." },
+            { question: "You can insert a comment in a cell using the view tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم إدراج التعليقات وإدارتها من تبويب 'مراجعة' (Review)." },
+            { question: "Filtering is used to arrange values in ascending or descending order.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'التصفية' (Filtering) تُستخدم لإخفاء البيانات التي لا تفي بمعايير معينة. 'الفرز' (Sorting) هو الذي يُستخدم للترتيب." },
+            { question: "Excel allows performing calculations on more than three worksheets.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: لا يوجد حد لثلاث أوراق عمل؛ يمكنك ربط العديد من أوراق العمل معًا في الصيغ." },
+            { question: "The NOW functions belong to the general functions.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الدالة NOW تنتمي إلى فئة دوال 'التاريخ والوقت' (Date & Time)." },
+            { question: "The conditional formatting is located in insert group.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'التنسيق الشرطي' موجود في مجموعة 'أنماط' (Styles) ضمن تبويب 'الشريط الرئيسي' (Home)." },
+            { question: "The conditional formatting is located in the group ...", answers: [{ text: "Styles", correct: true }, { text: "Cells", correct: false }, { text: "Editing", correct: false }], explanation: "التفسير: 'التنسيق الشرطي' هو أداة رئيسية في مجموعة 'أنماط' (Styles) في تبويب الشريط الرئيسي." },
+            { question: "A way to find a subset of data to temporarily exclude rows that we don't want to display on the screen and show rows that match a condition.", answers: [{ text: "Filtering", correct: true }, { text: "Sorting", correct: false }, { text: "Validation", correct: false }], explanation: "التفسير: هذا هو التعريف الدقيق لعملية 'التصفية' (Filtering)." },
+            { question: "Is keeping an area of the worksheet visible while you scroll to other columns and rows.", answers: [{ text: "Freezing", correct: true }, { text: "Hiding", correct: false }, { text: "Locking", correct: false }], explanation: "التفسير: 'تجميد الأجزاء' (Freeze Panes) مصمم خصيصًا لإبقاء الصفوف أو الأعمدة العلوية مرئية أثناء التمرير." },
+            { question: "worksheet is protected in ...", answers: [{ text: "Two ways", correct: true }, { text: "One way", correct: false }, { text: "Three ways", correct: false }], explanation: "التفسير: يمكن حماية الورقة (لمنع تعديل المحتوى) وحماية المصنف (لمنع التعديلات الهيكلية)." },
+            { question: "You may use an image as a sheet background for display purposes only and is not printed.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: خلفية الورقة هي ميزة عرض فقط ولا تظهر عند الطباعة." },
+            { question: "The error #Num appears when there is an invalid numerical value.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يظهر الخطأ #NUM! عندما تواجه الصيغة مشكلة في قيمة رقمية، مثل حساب الجذر التربيعي لرقم سالب." },
+            { question: "You cannot control a cell value using data validation option.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'التحقق من صحة البيانات' (Data Validation) هو الأداة الرئيسية للتحكم في القيم التي يمكن إدخالها في خلية." },
+            { question: "The error #NUM! appears when the formula or function contains...", answers: [{ text: "invalid numerical values", correct: true }, { text: "wrong cell reference", correct: false }, { text: "text instead of numbers", correct: false }], explanation: "التفسير: هذا الخطأ خاص بالمشاكل مع القيم الرقمية في الصيغ." },
+            { question: "Function that returns the serial number for the current date.", answers: [{ text: "TODAY", correct: true }, { text: "NOW", correct: false }, { text: "DATE", correct: false }], explanation: "التفسير: الدالة TODAY() تُرجع الرقم التسلسلي للتاريخ الحالي فقط." },
+            { question: "To search within the worksheet for a specific formula or value use...", answers: [{ text: "Home tab", correct: true }, { text: "Data tab", correct: false }, { text: "Formulas tab", correct: false }], explanation: "التفسير: أداة 'بحث وتحديد' (Find & Select) موجودة في مجموعة 'تحرير' (Editing) ضمن تبويب 'الشريط الرئيسي' (Home)." },
+            { question: "Applying a specific format automatically, such as color, to one or more cells based on the cell's value according to a specified condition to distinguish it from the rest of the data.", answers: [{ text: "Conditional formatting", correct: true }, { text: "Data validation", correct: false }, { text: "Cell styles", correct: false }], explanation: "التفسير: هذا هو التعريف الدقيق لـ 'التنسيق الشرطي'." },
+            { question: "Operations enclosed in brackets are the last calculations performed by Excel within the equation.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتبع Excel ترتيب العمليات الحسابية (PEMDAS)، حيث يتم حساب الأقواس (Brackets/Parentheses) أولاً." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-right', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
+
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "صحيح!";
+                feedbackEl.style.color = '#16a34a';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "للأسف، إجابة خاطئة.";
+                feedbackEl.style.color = '#dc2626';
+            }
+
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'عرض النتائج';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'السؤال التالي';
+        }
+
+    </script>
+</body>
+
+</html>

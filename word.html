@@ -1,320 +1,382 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Processing Test - Timed Quiz</title>
+    <title>اختبار Word</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Neutrals (Slate, Sky, Green, Red) -->
-    <!-- Application Structure Plan: The app is designed as a timed quiz flow. 1. Start Screen: Welcomes the user and explains the rules (timed quiz, question types). A clear "Start" button initiates the test. 2. Quiz Screen: This is the core interactive view. It displays one question at a time with options. A prominent timer counts down. User selection provides immediate feedback. This focused view prevents overwhelm. 3. Results Screen: Appears when the timer ends or all questions are answered. It shows the score, a summary, and an option to restart. This structure provides a clear, task-oriented user journey from start to finish. -->
-    <!-- Visualization & Content Choices: Report Info: Q&A List -> Goal: Test Knowledge -> Viz/Method: Interactive Quiz UI (HTML/CSS/JS) -> Interaction: Select answer, see immediate feedback (color change), auto-advance -> Justification: Simulates a test environment and provides instant learning reinforcement. Report Info: Time Constraint -> Goal: Add Challenge -> Viz/Method: Countdown Timer (JS) -> Interaction: Visual countdown -> Justification: Adds urgency and simulates exam conditions. Report Info: Final Score -> Goal: Summarize Performance -> Viz/Method: Results Card (HTML/CSS) -> Interaction: View score, restart quiz -> Justification: Provides clear feedback on performance and allows for re-engagement. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f1f5f9;
-            /* slate-100 */
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
         }
 
         .answer-btn.correct {
-            background-color: #4ade80 !important;
-            /* green-400 */
-            color: white !important;
-            border-color: #22c55e !important;
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
         }
 
         .answer-btn.incorrect {
-            background-color: #f87171 !important;
-            /* red-400 */
-            color: white !important;
-            border-color: #ef4444 !important;
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
         }
 
         .answer-btn:disabled {
             cursor: not-allowed;
         }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
     </style>
 </head>
 
-<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
-    <div id="quiz-app" class="w-full max-w-2xl mx-auto">
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
 
         <!-- Start Screen -->
-        <div id="start-screen" class="bg-white p-8 rounded-xl shadow-lg text-center">
-            <h1 class="text-3xl font-bold text-slate-900 mb-4">Word Processing Test</h1>
-            <p class="text-slate-600 mb-2">This quiz is based on questions from the "Tahrir Sinai" file, in their
-                original order.</p>
-            <p class="text-slate-600 mb-6">You have <strong class="text-sky-600">25 minutes</strong> to answer 68
-                questions.</p>
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اختبار مهارات Word</h1>
+            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 68 سؤالاً. لديك 25 دقيقة.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">اختر ترتيب الأسئلة:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">بالترتيب</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">عشوائي</button>
+                </div>
+            </div>
+
             <button id="start-btn"
-                class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-600 transition-colors duration-300 text-lg">
-                Start Quiz
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                ابدأ الاختبار
             </button>
         </div>
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-center mb-4">
-                    <div id="timer" class="text-lg font-bold bg-slate-200 text-slate-800 px-4 py-2 rounded-lg">
-                        Time: 25:00
-                    </div>
-                    <div id="progress" class="text-sm font-semibold text-slate-500">
-                        Question 1 / 68
-                    </div>
-                </div>
-                <div class="h-1 w-full bg-slate-200 rounded-full mb-6">
-                    <div id="progress-bar" class="h-1 bg-sky-500 rounded-full transition-all duration-300"
-                        style="width: 0%;"></div>
-                </div>
-
-                <div id="question-container" class="mb-6 min-h-[100px]">
-                    <h2 id="question-text" class="text-xl font-semibold text-center text-slate-900"></h2>
-                </div>
-
-                <div id="answers-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/68</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
                 </div>
             </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                السؤال التالي
+            </button>
         </div>
 
         <!-- Results Screen -->
-        <div id="results-screen" class="hidden">
-            <div class="bg-white p-8 rounded-xl shadow-lg text-center">
-                <h2 id="results-title" class="text-3xl font-bold text-slate-900 mb-4">Time's Up!</h2>
-                <p class="text-slate-600 mb-6 text-lg">Your final score is:</p>
-                <div
-                    class="bg-sky-100 border-2 border-sky-200 rounded-full w-40 h-40 mx-auto flex flex-col justify-center items-center mb-6">
-                    <span id="score" class="text-4xl font-bold text-sky-700">0</span>
-                    <span id="score-total" class="text-slate-600">of 68</span>
-                </div>
-                <p id="results-summary" class="text-slate-600 mb-6"></p>
-                <button id="restart-btn"
-                    class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-600 transition-colors duration-300 text-lg">
-                    Try Again
-                </button>
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اكتمل الاختبار!</h1>
+            <p class="text-gray-600 mb-6">هذه هي نتيجتك:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">نتيجتك:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
             </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                إعادة الاختبار
+            </button>
         </div>
 
     </div>
 
     <script>
-        const allQuestions = [
-            { q: 'To control document margins, select...', options: ['page setup', 'Paragraph', 'Font', 'Styles'], a: 'page setup' },
-            { q: 'To move a word, it must be cut.', a: false },
-            { q: 'To choose wide margins within the document from the... group.', options: ['page setup', 'Themes', 'Page Background', 'Arrange'], a: 'page setup' },
-            { q: 'To choose wide margins within the document from the ... tab.', options: ['Layout', 'Insert', 'Home', 'View'], a: 'Layout' },
-            { q: 'Ribbon has been included in Office applications since Office 2007.', a: true },
-            { q: 'The quick style created appears in … group.', options: ['Style', 'Font', 'Editing', 'Clipboard'], a: 'Style' },
-            { q: 'To change the format of a table in Word from a tab ...', options: ['Table Design', 'Layout', 'References', 'Mailings'], a: 'Table Design' },
-            { q: 'Spelling errors in Word are marked with a … line under the word.', options: ['blue', 'red', 'green', 'yellow'], a: 'red' },
-            { q: 'The endnote appears in the bottom margin of each page.', a: false },
-            { q: 'Translation is available within Word via the Thesaurus tool.', a: false },
-            { q: 'Press ... key to print the document.', options: ['Ctrl + S', 'Ctrl + C', 'Ctrl + P', 'Ctrl + V'], a: 'Ctrl + P' },
-            { q: 'Text cannot be replaced within a Word document.', a: false },
-            { q: 'To view different sections of a document at the same time ...', options: ['Split', 'New Window', 'Arrange All', 'View Side by Side'], a: 'Split' },
-            { q: 'The shortcut to close the Word file is …', options: ['Ctrl + W', 'Ctrl + Q', 'Alt + F4', 'Ctrl + X'], a: 'Ctrl + W' },
-            { q: 'To write a comment on a word, press key …', options: ['Ctrl + Alt + M', 'Ctrl + K', 'Ctrl + Shift + C', 'Alt + C'], a: 'Ctrl + Alt + M' },
-            { q: 'You can add a comment on some words using the ... tab.', options: ['Review', 'Insert', 'View', 'Home'], a: 'Review' },
-            { q: 'If you have multiple Word documents open at once, you can switch between open windows by Switch windows, window group, view tab.', a: true },
-            { q: 'To add page numbering within a word document using … group.', options: ['Header and Footer', 'Text', 'Symbols', 'Pages'], a: 'Header and Footer' },
-            { q: 'It is possible to control the display of the ruler from the …', options: ['In the Show group of the View tab', 'In the Zoom group of the View tab', 'In the Page Setup group of the Layout tab', 'In the Font group of the Home tab'], a: 'In the Show group of the View tab' },
-            { q: 'The indent can be set using the ... sign.', options: ['Tab', 'Space', 'Enter', 'Shift'], a: 'Tab' },
-            { q: 'You can write in a Word document in three columns through a group ...', options: ['Page Setup', 'Paragraph', 'Font', 'Arrange'], a: 'Page Setup' },
-            { q: 'To control adding a cell or column within a table in a Word file from the tab ...', options: ['Table Layout', 'Table Design', 'Insert', 'Home'], a: 'Table Layout' },
-            { q: 'To change the format of a word, it must be selected first.', a: true },
-            { q: 'The head and footer appear in read mode.', a: false },
-            { q: 'The header and footer settings appear in read mode.', a: false },
-            { q: 'You can search for a word from the ... tab.', options: ['Home', 'Insert', 'View', 'Review'], a: 'Home' },
-            { q: 'To resize a page in the word, use … group.', options: ['page setup', 'Scale', 'Size', 'Arrange'], a: 'page setup' },
-            { q: 'To resize a page in the word, use … tab.', options: ['Layout', 'Design', 'File', 'View'], a: 'Layout' },
-            { q: 'You can insert page break, from …', options: ['Insert', 'Layout', 'Home', 'Design'], a: 'Insert' },
-            { q: 'You can insert breaks, from …', options: ['Layout', 'Insert', 'References', 'View'], a: 'Layout' },
-            { q: 'We can add a chart from photo option.', a: false },
-            { q: 'You can insert a chart from a photo group.', a: false },
-            { q: 'You can insert a chart from a photo collection (illustrations group).', a: false },
-            { q: '... is a set of characteristics, such as font name, size, color, paragraph alignment, spacing, border and shading.', options: ['Style', 'Theme', 'Template', 'Format'], a: 'Style' },
-            { q: 'An equation can be inserted from a set of symbols.', a: true },
-            { q: 'You can move between changes tracked by the file but you can\'t approve or reject them.', a: false },
-            { q: 'To add the signature line, from ….. group.', options: ['Text', 'Illustrations', 'Symbols', 'Header & Footer'], a: 'Text' },
-            { q: 'A document watermark can be made through a group …', options: ['Page Background', 'Page Setup', 'Themes', 'Paragraph'], a: 'Page Background' },
-            { q: 'Paragraph borders appear on the horizontal ruler only by clicking on the beginning of the Paragraph.', a: false },
-            { q: 'Paragraph borders appear on the horizontal ruler by clicking on the beginning of the Paragraph.', a: true },
-            { q: 'In print page preview mode, you can see all the pages of your document.', a: true },
-            { q: 'The document can be saved in different formats except …', options: ['.exe', '.pdf', '.docx', '.txt'], a: '.exe' },
-            { q: 'It is possible to control the insertion of a footnote into the word processor from a master tab.', a: false },
-            { q: 'You can insert three dimensional models from ... set.', options: ['illustrations', 'Media', 'Text', 'Add-ins'], a: 'illustrations' },
-            { q: 'You can translate by selecting the word and right clicking on it.', a: true },
-            { q: 'A page break can be inserted from Breaks tab.', a: false },
-            { q: 'Used to place frames and show them together in a horizontal plane …', options: ['Arrange all', 'View Side by Side', 'Split', 'Switch Windows'], a: 'Arrange all' },
-            { q: 'Allows you to move through the pages of a document in a structured view…', options: ['Navigation pane', 'Ruler', 'Gridlines', 'Thumbnails'], a: 'Navigation pane' },
-            { q: 'The headers and footers were not visible in .. view.', options: ['Draft', 'Print Layout', 'Web Layout', 'Read Mode'], a: 'Draft' },
-            { q: 'The default view in Word is the …', options: ['Print layout', 'Read Mode', 'Web Layout', 'Outline'], a: 'Print layout' },
-            { q: 'Cross references are updated automatically.', a: false },
-            { q: '…. are text below illustrations.', options: ['Captions', 'Footnotes', 'Endnotes', 'Comments'], a: 'Captions' },
-            { q: 'The method of numbering the footnote cannot be changed to be alphabetically instead of traditional numbers.', a: false },
-            { q: 'When you click "Save selection as a new Quick Style", the style should not be named.', a: false },
-            { q: 'Status bar contains the number of words in a word processor document.', a: true },
-            { q: 'The document is printed or previewed before printing from the View tab.', a: false },
-            { q: 'A style is a set of characteristics, such as font name, size, color, paragraph alignment, spacing, borders and shading.', a: true },
-            { q: 'The Footnote and Endnote dialog box contains options to control how they appear from the master tab.', a: false },
-            { q: 'The Footnote and Endnote dialog box contains options to control how they appear from the References tab.', a: true },
-            { q: 'Start Mail Merge group contains a recipient selection tool (Select Recipients) which allows us to write a new list.', a: false },
-            { q: 'Start Mail Merge section contains a set of tools that identify the recipients of a message.', a: false },
-            { q: 'In print page preview mode, you can see...', options: ['all the pages of your document', 'the current page only', 'even pages only', 'odd pages only'], a: 'all the pages of your document' },
-            { q: 'You can translate a word by clicking on it.', a: true },
-            { q: 'Information in the Citations or Manage Sources tool cannot be used to create footnotes or endnotes.', a: true },
-            { q: 'The document saves with extension HMT for display on the Web.', a: false },
-            { q: 'To add an additional shape in a SmartArt graphic …', options: ['Right-click on the shape and choose "Add Shape"', 'Press Enter', 'Drag and drop from the shapes list', 'Go to the Insert tab'], a: 'Right-click on the shape and choose "Add Shape"' },
-            { q: 'The position of images in the document is determined by the group ....', options: ['Arrange', 'Picture Styles', 'Size', 'Adjust'], a: 'Arrange' },
-            { q: 'To view the origin of the merged fields, we choose ...', options: ['Highlight fields', 'Preview Results', 'Address Block', 'Greeting Line'], a: 'Highlight fields' },
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "To control document margins, select...", answers: [{ text: "page setup", correct: true }, { text: "font", correct: false }, { text: "paragraph", correct: false }], explanation: "التفسير: مجموعة 'إعداد الصفحة' (Page Setup) في تبويب 'تخطيط' تحتوي على أوامر الهوامش والاتجاه والحجم." },
+            { question: "To move a word, it must be cut.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن نقل كلمة باستخدام القص واللصق، أو بالسحب والإفلات مباشرة بالماوس." },
+            { question: "To choose wide margins within the document from the ... group.", answers: [{ text: "page setup", correct: true }, { text: "styles", correct: false }, { text: "themes", correct: false }], explanation: "التفسير: الهوامش هي جزء من إعداد الصفحة، لذلك توجد في مجموعة 'إعداد الصفحة'." },
+            { question: "To choose wide margins within the document from the ... tab.", answers: [{ text: "Layout", correct: true }, { text: "Design", correct: false }, { text: "View", correct: false }], explanation: "التفسير: تبويب 'تخطيط' (Layout) هو المسؤول عن كل ما يتعلق بتخطيط الصفحة وهيكلها." },
+            { question: "Ribbon has been included in Office applications since Office 2007.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: تم تقديم واجهة الشريط (Ribbon) لأول مرة في مجموعة Office 2007 كبديل للقوائم التقليدية." },
+            { question: "The quick style created appears in...", answers: [{ text: "Style group", correct: true }, { text: "Font group", correct: false }, { text: "Editing group", correct: false }], explanation: "التفسير: عند حفظ نمط سريع جديد، يظهر في معرض الأنماط ضمن مجموعة 'أنماط' (Styles) في الشريط الرئيسي." },
+            { question: "To change the format of a table in Word from a tab ...", answers: [{ text: "Table Design", correct: true }, { text: "Layout", correct: false }, { text: "Insert", correct: false }], explanation: "التفسير: عند تحديد جدول، يظهر تبويب سياقي باسم 'تصميم الجدول' وهو مخصص لتنسيق مظهر الجدول." },
+            { question: "Spelling errors in Word are marked with a ... line under the word.", answers: [{ text: "red", correct: true }, { text: "blue", correct: false }, { text: "green", correct: false }], explanation: "التفسير: الخط الأحمر المتعرج يشير إلى خطأ إملائي محتمل، بينما يشير الخط الأزرق إلى خطأ نحوي." },
+            { question: "The endnote appears in the bottom margin of each page.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: التعليق الختامي (Endnote) يظهر في نهاية المستند بالكامل. الحاشية السفلية (Footnote) هي التي تظهر أسفل كل صفحة." },
+            { question: "Translation is available within Word via the Thesaurus tool.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: أداة 'قاموس المرادفات' (Thesaurus) تقترح كلمات بديلة، بينما أداة 'الترجمة' (Translate) موجودة بشكل منفصل في تبويب 'مراجعة'." },
+            { question: "Press ... key to print the document.", answers: [{ text: "Ctrl + P", correct: true }, { text: "Ctrl + S", correct: false }, { text: "Ctrl + C", correct: false }], explanation: "التفسير: Ctrl + P هو اختصار الطباعة (Print) القياسي في معظم التطبيقات." },
+            { question: "Text cannot be replaced within a Word document.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن استبدال النص بسهولة باستخدام أداة 'استبدال' (Replace) الموجودة في الشريط الرئيسي." },
+            { question: "To view different sections of a document at the same time ...", answers: [{ text: "Split", correct: true }, { text: "New Window", correct: false }, { text: "Arrange All", correct: false }], explanation: "التفسير: أمر 'انقسام' (Split) في تبويب 'عرض' يقسم النافذة الحالية إلى جزأين يمكن التمرير في كل منهما بشكل مستقل." },
+            { question: "The shortcut to close the Word file is ...", answers: [{ text: "Ctrl + W", correct: true }, { text: "Alt + F4", correct: false }, { text: "Ctrl + Q", correct: false }], explanation: "التفسير: Ctrl + W يغلق المستند الحالي مع إبقاء برنامج Word مفتوحًا. Alt + F4 يغلق البرنامج بأكمله." },
+            { question: "To write a comment on a word press key ...", answers: [{ text: "Ctrl+Alt+M", correct: true }, { text: "Ctrl+K", correct: false }, { text: "Ctrl+Shift+C", correct: false }], explanation: "التفسير: هذا هو الاختصار المخصص لإدراج تعليق جديد." },
+            { question: "You can add a comment on some words using the ....", answers: [{ text: "Review tab", correct: true }, { text: "Insert tab", correct: false }, { text: "Home tab", correct: false }], explanation: "التفسير: تبويب 'مراجعة' (Review) يحتوي على مجموعة 'التعليقات' لإضافة وإدارة التعليقات." },
+            { question: "If you have multiple Word documents open at once, you can switch between open windows by Switch windows, window group, view tab.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه هي الطريقة الدقيقة للتنقل بين المستندات المفتوحة باستخدام أمر 'تبديل النوافذ' في تبويب 'عرض'." },
+            { question: "To add page numbering within a word document using ... group", answers: [{ text: "Header and Footer", correct: true }, { text: "Text", correct: false }, { text: "Symbols", correct: false }], explanation: "التفسير: أرقام الصفحات هي جزء من الرأس أو التذييل، لذلك توجد أدواتها في مجموعة 'رأس وتذييل الصفحة' ضمن تبويب 'إدراج'." },
+            { question: "It is possible to control the display of the ruler from the...", answers: [{ text: "Show group (View tab)", correct: true }, { text: "Page Setup group (Layout tab)", correct: false }, { text: "Window group (View tab)", correct: false }], explanation: "التفسير: تبويب 'عرض' (View) يحتوي على مجموعة 'إظهار' (Show) التي بها مربع اختيار للتحكم في ظهور المسطرة." },
+            { question: "The indent can be set using the master... sign.", answers: [{ text: "Tab", correct: true }, { text: "Space", correct: false }, { text: "Enter", correct: false }], explanation: "التفسير: علامات الجدولة (Tabs) على المسطرة هي التي تتحكم في المسافات البادئة للفقرات." },
+            { question: "You can write in a Word document in three columns through a group...", answers: [{ text: "Page Setup", correct: true }, { text: "Paragraph", correct: false }, { text: "Arrange", correct: false }], explanation: "التفسير: خيار 'الأعمدة' (Columns) هو جزء من تخطيط الصفحة، لذلك يوجد في مجموعة 'إعداد الصفحة' بتبويب 'تخطيط'." },
+            { question: "To control adding a cell or column within a table in a Word file from the tab...", answers: [{ text: "Table Layout", correct: true }, { text: "Table Design", correct: false }, { text: "Insert", correct: false }], explanation: "التفسير: تبويب 'تخطيط' (Layout) السياقي للجداول هو المسؤول عن هيكل الجدول، مثل إضافة أو حذف الصفوف والأعمدة." },
+            { question: "To change the format of a word, it must be selected first.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه قاعدة أساسية في معظم برامج الكمبيوتر؛ يجب تحديد العنصر أولاً لتطبيق أي تغيير عليه." },
+            { question: "The head and footer appear in read mode.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'وضع القراءة' (Read Mode) يركز على المحتوى ويخفي عناصر مثل الرأس والتذييل. تظهر هذه العناصر بوضوح في 'تخطيط الطباعة'." },
+            { question: "The header and footer settings appear in read mode.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: لا يمكن تعديل إعدادات الرأس والتذييل في وضع القراءة. يتم ذلك في عرض 'تخطيط الطباعة'." },
+            { question: "You can search for a word from the tab...", answers: [{ text: "Home page", correct: true }, { text: "View", correct: false }, { text: "Review", correct: false }], explanation: "التفسير: أداة 'بحث' (Find) موجودة في مجموعة 'تحرير' (Editing) في أقصى يمين تبويب 'الشريط الرئيسي'." },
+            { question: "To resize a page in the word, use ... group.", answers: [{ text: "page setup", correct: true }, { text: "scale", correct: false }, { text: "arrange", correct: false }], explanation: "التفسير: أمر 'الحجم' (Size) موجود ضمن مجموعة 'إعداد الصفحة' في تبويب 'تخطيط'." },
+            { question: "To resize a page in the word, use ... tab.", answers: [{ text: "Layout", correct: true }, { text: "Design", correct: false }, { text: "File", correct: false }], explanation: "التفسير: تبويب 'تخطيط' (Layout) هو المسؤول عن أبعاد الصفحة وتخطيطها." },
+            { question: "You can insert page break, from ......", answers: [{ text: "Insert", correct: true }, { text: "Layout", correct: false }, { text: "Home", correct: false }], explanation: "التفسير: تبويب 'إدراج' (Insert) يحتوي على أمر 'فاصل صفحات' (Page Break)." },
+            { question: "You can insert breaks, from ...", answers: [{ text: "Layout", correct: true }, { text: "Insert", correct: false }, { text: "Design", correct: false }], explanation: "التفسير: تبويب 'تخطيط' (Layout) يحتوي على قائمة 'فواصل' (Breaks) التي تتضمن فواصل الصفحات والأعمدة والمقاطع." },
+            { question: "We can add a chart from photo option.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم إدراج المخططات من خيار 'مخطط' (Chart) وليس 'صورة' (Photo)، وكلاهما في مجموعة 'رسومات توضيحية' بتبويب 'إدراج'." },
+            { question: "You can insert a chart from a photo group.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: مجموعة 'الصور' مخصصة للصور فقط. المخططات موجودة في نفس التبويب ولكن في مجموعة 'رسومات توضيحية' (Illustrations)." },
+            { question: "You can insert a chart from a photo collection.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: نفس السبب السابق، المخططات والصور أدوات منفصلة ضمن تبويب 'إدراج'." },
+            { question: "... is a set of characteristics, such as font name size and color paragraph alignment and style spacing border and shading.", answers: [{ text: "Style", correct: true }, { text: "Theme", correct: false }, { text: "Template", correct: false }], explanation: "التفسير: هذا هو التعريف الدقيق للنمط (Style)، وهو مجموعة منسقة من خصائص التنسيق." },
+            { question: "An equation can be inserted from a set of symbols.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: تبويب 'إدراج' يحتوي على مجموعة 'رموز' (Symbols) التي بها أمري 'معادلة' و 'رمز'." },
+            { question: "you can move between changes tracked by the file but can't approve or reject them.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: أداة 'تعقب التغييرات' تسمح لك بالتنقل بين التعديلات، ولكن الموافقة والرفض يتطلبان صلاحيات إضافية." },
+            { question: "To add the signature line from ... group", answers: [{ text: "Text", correct: true }, { text: "Symbols", correct: false }, { text: "Header & Footer", correct: false }], explanation: "التفسير: 'سطر التوقيع' (Signature Line) هو نوع من كائنات النص، لذلك يوجد في مجموعة 'نص' بتبويب 'إدراج'." },
+            { question: "A document watermark can be made through a group...", answers: [{ text: "Page Background", correct: true }, { text: "Page Setup", correct: false }, { text: "Themes", correct: false }], explanation: "التفسير: 'العلامة المائية' (Watermark) هي جزء من خلفية الصفحة، وتوجد في مجموعة 'خلفية الصفحة' بتبويب 'تصميم'." },
+            { question: "Paragraph borders appear on the horizontal ruler only by clicking on the beginning of the Paragraph.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: حدود الفقرة (المسافات البادئة) تظهر على المسطرة الأفقية، ولكن المسطرة العمودية تظهر هوامش الصفحة." },
+            { question: "Paragraph borders appear on the horizontal ruler by clicking on the beginning of the Paragraph.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: عند وضع المؤشر في فقرة، تظهر علامات المسافة البادئة الخاصة بها على المسطرة الأفقية." },
+            { question: "In print page preview mode, you can see all the pages of your document.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: 'معاينة الطباعة' (Print Preview) مصممة خصيصًا لعرض شكل المستند بالكامل قبل طباعته." },
+            { question: "The document can be saved in different formats except...", answers: [{ text: ".exe", correct: true }, { text: ".pdf", correct: false }, { text: ".docx", correct: false }], explanation: "التفسير: .exe هو امتداد للملفات التنفيذية (البرامج)، ولا يمكن حفظ مستند Word بهذا التنسيق." },
+            { question: "It is possible to control the insertion of a footnote into the word processor from a master tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الحواشي السفلية والتعليقات الختامية يتم إدراجها من تبويب 'مراجع' (References)." },
+            { question: "You can insert three dimensional models from ... set", answers: [{ text: "illustrations", correct: true }, { text: "media", correct: false }, { text: "text", correct: false }], explanation: "التفسير: النماذج ثلاثية الأبعاد هي نوع من الرسومات، وتوجد في مجموعة 'رسومات توضيحية' بتبويب 'إدراج'." },
+            { question: "You can translate by selecting the word and and right clicking on it.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: قائمة النقر بزر الماوس الأيمن تحتوي على خيار 'ترجمة' للوصول السريع." },
+            { question: "A page break can be inserted from Breaks tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'فواصل' (Breaks) هي قائمة أوامر وليست تبويبًا. توجد هذه القائمة في تبويب 'تخطيط'." },
+            { question: "Used to place frames and show them together in a horizontal plane ...", answers: [{ text: "Arrange all", correct: true }, { text: "Split", correct: false }, { text: "New Window", correct: false }], explanation: "التفسير: أمر 'ترتيب الكل' (Arrange All) في تبويب 'عرض' يقوم بترتيب كل النوافذ المفتوحة جنبًا إلى جنب." },
+            { question: "Allow to move through the pages of document in a structured view...", answers: [{ text: "Navigation pane", correct: true }, { text: "Outline view", correct: false }, { text: "Read Mode", correct: false }], explanation: "التفسير: 'جزء التنقل' (Navigation Pane) يعرض العناوين الرئيسية للمستند ويسمح بالقفز بين الأقسام بسهولة." },
+            { question: "The headers and footers were not visible in .. view..", answers: [{ text: "Draft", correct: true }, { text: "Print layout", correct: false }, { text: "Web layout", correct: false }], explanation: "التفسير: 'عرض المسودة' (Draft) يركز على النص فقط ويبسط العرض عن طريق إخفاء عناصر مثل الرأس والتذييل والصور." },
+            { question: "The default view in the word is the...", answers: [{ text: "Print layout", correct: true }, { text: "Read Mode", correct: false }, { text: "Web layout", correct: false }], explanation: "التفسير: 'تخطيط الطباعة' (Print Layout) هو العرض الافتراضي لأنه يوضح كيف سيبدو المستند عند طباعته." },
+            { question: "Cross references are updated automatically.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يجب تحديث المراجع التبادلية يدويًا (بتحديدها والضغط على F9) لتعكس أي تغييرات." },
+            { question: ".... are text below illustrations.", answers: [{ text: "Captions", correct: true }, { text: "Footnotes", correct: false }, { text: "Endnotes", correct: false }], explanation: "التفسير: 'التسميات التوضيحية' (Captions) هي نصوص وصفية توضع أسفل الصور والجداول." },
+            { question: "The method of numbering the footnote cannot be changed to be alphabetically instead of traditional numbers.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن تغيير تنسيق ترقيم الحواشي السفلية بسهولة من مربع حوار الحواشي ليشمل أرقامًا أو حروفًا أو رموزًا." },
+            { question: "When you click Save selection as a new Quick Style, the style should not be named so that the style you created appears in the style gallery.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يجب تسمية النمط الجديد حتى تتمكن من التعرف عليه وحفظه في المعرض." },
+            { question: "A style is a set of characteristics, such as font name size and color paragraph alignment and spacing, borders and shading.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو التعريف الشامل للنمط (Style) في Word." },
+            { question: "The document is printed or previewed before printing From the View tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: تتم معاينة الطباعة والطباعة من قائمة 'ملف' (File)." },
+            { question: "The ... bar contains the number of words in a word processor document.", answers: [{ text: "Status", correct: true }, { text: "Title", correct: false }, { text: "Scroll", correct: false }], explanation: "التفسير: 'شريط المعلومات' (Status Bar) في الأسفل يعرض معلومات مثل عدد الكلمات ورقم الصفحة." },
+            { question: "The Footnote and Endnote dialog box contains options to control how footnotes and endnotes appear from master tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يوجد مربع الحوار هذا في تبويب 'مراجع' (References)." },
+            { question: "The Footnote and Endnote dialog box contains options to control how footnotes and endnotes appear from References tab.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: تبويب 'مراجع' (References) هو المكان الصحيح للتحكم في الحواشي السفلية والتعليقات الختامية." },
+            { question: "Start Mail Merge group contains a recipient selection tool (Select Recipients) which allows us to write a new list containing recipient data.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: أداة 'تحديد المستلمين' هي الخطوة الأولى في دمج المراسلات وتسمح بإنشاء قائمة جديدة أو استخدام قائمة موجودة." },
+            { question: "Start Mail Merge section contains a set of tools that identify the recipients of a message.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم تحديد المستلمين من مجموعة 'تحديد المستلمين' (Select Recipients)، وليس من مجموعة 'بدء دمج المراسلات'." },
+            { question: "In print page preview mode, you can see...", answers: [{ text: "all the pages of your document", correct: true }, { text: "only the current page", correct: false }, { text: "only the first page", correct: false }], explanation: "التفسير: تتيح لك معاينة الطباعة التنقل بين جميع صفحات المستند لرؤيتها قبل الطباعة." },
+            { question: "You can translate a word by clicking on it.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يجب تحديد الكلمة أولاً، ثم النقر عليها بزر الماوس الأيمن واختيار 'ترجمة' أو استخدام الأداة من تبويب 'مراجعة'." },
+            { question: "Information in the Citations or Manage Sources tool cannot be used to create footnotes or endnotes.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: أدوات الاقتباسات مخصصة لإنشاء قائمة المراجع (Bibliography)، وهي منفصلة عن نظام الحواشي السفلية." },
+            { question: "The document saves with extinction HMT for display on the Web.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الامتداد الصحيح لصفحات الويب هو .html أو .htm." },
+            { question: "To add an additional shape in a SmartArt graphic ...", answers: [{ text: "Right-click on the shape and choose 'Add Shape'", correct: true }, { text: "Insert -> New Shape", correct: false }, { text: "Format -> Add Shape", correct: false }], explanation: "التفسير: قائمة النقر بزر الماوس الأيمن على شكل موجود هي أسرع طريقة لإضافة شكل جديد." },
+            { question: "The position of images in the document is determined by the group ....", answers: [{ text: "Arrange", correct: true }, { text: "Illustrations", correct: false }, { text: "Picture Styles", correct: false }], explanation: "التفسير: مجموعة 'ترتيب' (Arrange) في تبويب 'تنسيق الصورة' تحتوي على أدوات مثل 'الموضع' و 'التفاف النص' للتحكم في مكان الصورة." },
+            { question: "To view the origin of the merged fields, we choose ...", answers: [{ text: "Highlight fields", correct: true }, { text: "Preview Results", correct: false }, { text: "Address Block", correct: false }], explanation: "التفسير: خيار 'تمييز حقول الدمج' (Highlight Merge Fields) يظلل الحقول التي سيتم استبدالها ببيانات من المصدر." }
         ];
 
-        const QUIZ_LENGTH = allQuestions.length;
-        const QUIZ_TIME = 1500; // 25 minutes in seconds
-
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let timer;
-        let timeLeft = QUIZ_TIME;
-
+        // --- DOM ELEMENTS ---
         const startScreen = document.getElementById('start-screen');
         const quizScreen = document.getElementById('quiz-screen');
         const resultsScreen = document.getElementById('results-screen');
 
         const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
         const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
 
-        const timerEl = document.getElementById('timer');
-        const progressEl = document.getElementById('progress');
-        const progressBarEl = document.getElementById('progress-bar');
+        const questionNumberEl = document.getElementById('question-number');
         const questionTextEl = document.getElementById('question-text');
-        const answersContainerEl = document.getElementById('answers-container');
-        const scoreEl = document.getElementById('score');
-        const scoreTotalEl = document.getElementById('score-total');
-        const resultsTitleEl = document.getElementById('results-title');
-        const resultsSummaryEl = document.getElementById('results-summary');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
 
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
         startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
         restartBtn.addEventListener('click', () => {
             resultsScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
         });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
 
         function startQuiz() {
-            startScreen.classList.add('hidden');
-            quizScreen.classList.remove('hidden');
-
-            questions = allQuestions;
             currentQuestionIndex = 0;
             score = 0;
-            timeLeft = QUIZ_TIME;
 
-            progressEl.textContent = `Question 1 / ${QUIZ_LENGTH}`;
-            scoreTotalEl.textContent = `of ${QUIZ_LENGTH}`;
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
 
-            displayQuestion();
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
             startTimer();
+            setNextQuestion();
         }
 
         function startTimer() {
-            timerEl.textContent = `Time: ${formatTime(timeLeft)}`;
-            timer = setInterval(() => {
-                timeLeft--;
-                timerEl.textContent = `Time: ${formatTime(timeLeft)}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    showResults(true);
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
                 }
             }, 1000);
         }
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            /**
-             * Starts the timer countdown for the quiz.
-             * @param {number} timeLeft The amount of time left in the quiz.
-             * @param {HTMLElement} timerEl The element to display the timer text in.
-             * @param {boolean} showResultsOnTimeout Whether to show the results screen
-             *  immediately when the timer runs out, or wait for the user to answer
-             *  the current question.
-             */
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
         }
 
-        function displayQuestion() {
-            const question = questions[currentQuestionIndex];
-            questionTextEl.textContent = question.q;
-            answersContainerEl.innerHTML = '';
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
 
-            const options = question.options ? question.options : ['True', 'False'];
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
 
-            options.forEach(option => {
+            answers.forEach(answer => {
                 const button = document.createElement('button');
-                button.textContent = option;
-                button.classList.add('answer-btn', 'w-full', 'p-4', 'rounded-lg', 'border-2', 'border-slate-300', 'bg-slate-100', 'hover:bg-slate-200', 'hover:border-slate-400', 'transition-colors', 'duration-200', 'font-semibold');
-                button.addEventListener('click', () => selectAnswer(button, option, question));
-                answersContainerEl.appendChild(button);
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-right', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
             });
-
-            progressEl.textContent = `Question ${currentQuestionIndex + 1} / ${QUIZ_LENGTH}`;
-            progressBarEl.style.width = `${((currentQuestionIndex + 1) / QUIZ_LENGTH) * 100}%`;
         }
 
-        function selectAnswer(button, selectedOption, question) {
-            const isTfQuestion = !question.options;
-            const selectedAnswer = isTfQuestion ? (selectedOption === 'True') : selectedOption;
-            const isCorrect = selectedAnswer === question.a;
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
 
             if (isCorrect) {
                 score++;
-                button.classList.add('correct');
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "صحيح!";
+                feedbackEl.style.color = '#16a34a';
             } else {
-                button.classList.add('incorrect');
-                // Highlight the correct answer for T/F questions
-                if (isTfQuestion) {
-                    Array.from(answersContainerEl.children).forEach(btn => {
-                        const optionValue = (btn.textContent === 'True');
-                        if (optionValue === question.a) {
-                            btn.classList.add('correct');
-                        }
-                    });
-                }
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "للأسف، إجابة خاطئة.";
+                feedbackEl.style.color = '#dc2626';
             }
 
-            // Disable all buttons
-            Array.from(answersContainerEl.children).forEach(btn => {
-                btn.disabled = true;
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
             });
 
-            setTimeout(() => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < QUIZ_LENGTH) {
-                    displayQuestion();
-                } else {
-                    clearInterval(timer);
-                    showResults(false);
-                }
-            }, 1500);
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'عرض النتائج';
+                nextBtn.classList.remove('hidden');
+            }
         }
 
-        function showResults(timeUp) {
+        function showResults() {
+            clearInterval(timerInterval);
             quizScreen.classList.add('hidden');
             resultsScreen.classList.remove('hidden');
-
-            scoreEl.textContent = score;
-            if (timeUp) {
-                resultsTitleEl.textContent = "Time's Up!";
-            } else {
-                resultsTitleEl.textContent = "Quiz Complete!";
-            }
-            resultsSummaryEl.textContent = `You answered ${score} out of ${QUIZ_LENGTH} questions correctly.`;
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'السؤال التالي';
         }
 
     </script>

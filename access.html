@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .answer-btn.correct {
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
+        }
+
+        .answer-btn.incorrect {
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اختبار مهارات Access</h1>
+            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 71 سؤالاً. لديك 25 دقيقة.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">اختر ترتيب الأسئلة:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">بالترتيب</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">عشوائي</button>
+                </div>
+            </div>
+
+            <button id="start-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                ابدأ الاختبار
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/71</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                السؤال التالي
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اكتمل الاختبار!</h1>
+            <p class="text-gray-600 mb-6">هذه هي نتيجتك:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">نتيجتك:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
+            </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                إعادة الاختبار
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "Through the Account command, the default size of the text field can be set to 200.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم ضبط الإعدادات الافتراضية للبرنامج مثل حجم الحقل النصي من خلال File -> Options (ملف -> خيارات)." },
+            { question: "Through the Options command, the default size of the text field can be set to 200.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: قائمة 'خيارات' (Options) هي المكان الصحيح لتغيير الإعدادات الافتراضية للتطبيق." },
+            { question: "The Delivery table must be in a one to one relationship.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: جدول التوصيل عادة ما يكون جدولاً وسيطاً في علاقة 'أطراف بأطراف' (Many-to-Many) بين جداول مثل الطلبات والمنتجات." },
+            { question: "The common field between the two tables must be of the same type.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: لإنشاء علاقة صحيحة، يجب أن يكون نوع البيانات وحجم الحقل (المفتاح الأساسي والأجنبي) متطابقين." },
+            { question: "Data can be exported in text format and opened in Word.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يوفر Access خيارات تصدير متعددة، بما في ذلك ملفات نصية (TXT) يمكن فتحها بأي محرر نصوص مثل Word." },
+            { question: "Create tab is used to create new tables.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: تبويب 'إنشاء' (Create) هو المركز الرئيسي لإنشاء جميع كائنات قاعدة البيانات: الجداول، الاستعلامات، النماذج، والتقارير." },
+            { question: "Through Account command, we can get information about the database.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم الحصول على معلومات حول قاعدة البيانات الحالية من خلال File -> Info (ملف -> معلومات)." },
+            { question: "Selection query is used to retrieve date directly as it is.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: استعلام التحديد يُستخدم لاسترداد البيانات (Data) وليس التاريخ (Date) فقط." },
+            { question: "The 'Selection query' type is used to retrieve data directly as it is.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو الغرض الأساسي من استعلام التحديد (Select Query)، عرض البيانات دون تعديلها." },
+            { question: "... is responsible for controlling all the permissions and uses of the database.", answers: [{ text: "DBA (Data Base Administrator)", correct: true }, { text: "Programmer", correct: false }, { text: "Analyst", correct: false }], explanation: "التفسير: مدير قاعدة البيانات (DBA) هو المسؤول عن إدارة الأمان والأداء والصلاحيات." },
+            { question: "The responsibility of the application programmer is to analyze the requirements of the entity that will use the system and then determine all the data.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: هذه هي مسؤولية 'محلل النظم' (System Analyst)، بينما يقوم المبرمج بكتابة الكود بناءً على هذا التحليل." },
+            { question: "... identifies user requirements and develops specifications to determine what is required from the databases.", answers: [{ text: "Analyst", correct: true }, { text: "DBA", correct: false }, { text: "End User", correct: false }], explanation: "التفسير: محلل النظم هو الذي يترجم متطلبات العمل إلى مواصفات فنية لقاعدة البيانات." },
+            { question: "The database can be compressed and repaired from...", answers: [{ text: "DATABASE TOOLS tab", correct: true }, { text: "File -> Info", correct: false }, { text: "External Data tab", correct: false }], explanation: "التفسير: تبويب 'أدوات قاعدة البيانات' يحتوي على أداة 'ضغط وإصلاح قاعدة البيانات'." },
+            { question: "To compact and repair the database the command .... is used.", answers: [{ text: "Info", correct: true }, { text: "Options", correct: false }, { text: "Account", correct: false }], explanation: "التفسير: يوجد خيار 'ضغط وإصلاح' أيضًا في شاشة File -> Info." },
+            { question: "The database can be compressed and repaired from DATABASE TOOLS tab.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو أحد المكانين الرئيسيين لتنفيذ أمر الضغط والإصلاح." },
+            { question: "The database can be compressed and repaired from the External Data tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: تبويب 'بيانات خارجية' يُستخدم للاستيراد والتصدير، وليس لصيانة قاعدة البيانات." },
+            { question: "You can create a relationship between two tables from ...", answers: [{ text: "Database Tools", correct: true }, { text: "Create", correct: false }, { text: "External Data", correct: false }], explanation: "التفسير: نافذة 'العلاقات' (Relationships) يتم فتحها من تبويب 'أدوات قاعدة البيانات'." },
+            { question: "Data processing produces other data by merging more than one field together into a new table.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: معالجة البيانات (Data) تنتج معلومات (Information)." },
+            { question: "Database data can be exported to a text file from ... tab.", answers: [{ text: "External data", correct: true }, { text: "Home", correct: false }, { text: "Create", correct: false }], explanation: "التفسير: جميع عمليات الاستيراد والتصدير تتم من خلال تبويب 'بيانات خارجية'." },
+            { question: "Form View displays actual data.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: 'طريقة عرض النموذج' (Form View) هي طريقة العرض المخصصة للمستخدم النهائي لإدخال وعرض البيانات الفعلية." },
+            { question: "... displays actual data.", answers: [{ text: "Form Design", correct: false }, { text: "Form View", correct: true }, { text: "Layout View", correct: false }], explanation: "التفسير: 'طريقة عرض النموذج' (Form View) هي التي تعرض البيانات الحية، بينما 'تصميم النموذج' و 'عرض التخطيط' تستخدمان لتعديل تصميم النموذج نفسه." },
+            { question: "The information command is used to show information about the database from the number of tables, queries, and forms it contains.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: قائمة File -> Info تعرض ملخصًا لمكونات قاعدة البيانات وخصائصها." },
+            { question: "Through information command, we can get information about the database from number of tables, queries and the cells it contains.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'الخلايا' (Cells) هو مصطلح يستخدم في Excel. في Access، نتحدث عن 'السجلات' (Records) و 'الحقول' (Fields)." },
+            { question: "Through information command, we can get information about the database.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا صحيح، أمر Info من قائمة ملف يعرض معلومات عامة عن قاعدة البيانات." },
+            { question: "Linking tables to each other is done through the foreign field in one table and the alternative field in another table, provided that they have the same value.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم الربط بين المفتاح الأساسي (Primary Key) في جدول والمفتاح الأجنبي (Foreign Key) في جدول آخر." },
+            { question: "... retrieve data as it is.", answers: [{ text: "Select Query", correct: true }, { text: "Append Query", correct: false }, { text: "Delete Query", correct: false }], explanation: "التفسير: استعلام التحديد (Select Query) مخصص لعرض واسترداد البيانات." },
+            { question: "... is used to retrieve data from one or more tables.", answers: [{ text: "Select Query", correct: true }, { text: "Update Query", correct: false }, { text: "Make Table Query", correct: false }], explanation: "التفسير: يمكن لاستعلام التحديد دمج البيانات من جداول متعددة مرتبطة ببعضها." },
+            { question: "Data can be added to be saved in the table through a query called...", answers: [{ text: "Append query", correct: true }, { text: "Select query", correct: false }, { text: "Update query", correct: false }], explanation: "التفسير: استعلام الإلحاق (Append Query) يُستخدم لإضافة سجلات جديدة إلى جدول موجود." },
+            { question: "... calculates the sum or average of the collected data.", answers: [{ text: "Crosstab Query", correct: true }, { text: "Select Query", correct: false }, { text: "Append Query", correct: false }], explanation: "التفسير: الاستعلام الجدولي (Crosstab Query) يُستخدم لتلخيص البيانات وتجميعها، مثل حساب المجاميع والمتوسطات." },
+            { question: "To delete one or more student records select...", answers: [{ text: "Delete Query", correct: true }, { text: "Update Query", correct: false }, { text: "Select Query", correct: false }], explanation: "التفسير: استعلام الحذف (Delete Query) يُستخدم لإزالة سجلات كاملة من جدول بناءً على معايير محددة." },
+            { question: "To ... calculate and reconstruct data for easier analysis.", answers: [{ text: "Crosstab Query", correct: true }, { text: "Form", correct: false }, { text: "Report", correct: false }], explanation: "التفسير: الاستعلام الجدولي (Crosstab Query) يعيد هيكلة البيانات في شكل ملخص شبيه بالجداول المحورية في Excel لتسهيل التحليل." },
+            { question: "The student's relationship with academic subjects is a relationship of...", answers: [{ text: "many to many", correct: true }, { text: "one to one", correct: false }, { text: "one to many", correct: false }], explanation: "التفسير: الطالب الواحد يدرس مواد كثيرة، والمادة الواحدة يدرسها طلاب كثيرون. هذه علاقة أطراف بأطراف." },
+            { question: "A form can be created directly from a table without all of its fields appearing.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: عند إنشاء نموذج تلقائي من جدول، فإنه يتضمن جميع الحقول بشكل افتراضي. يمكنك حذفها لاحقًا في عرض التصميم." },
+            { question: "Use ... to create relationships between tables.", answers: [{ text: "Database Tools tab", correct: true }, { text: "Create tab", correct: false }, { text: "Home tab", correct: false }], explanation: "التفسير: أداة 'العلاقات' موجودة في تبويب 'أدوات قاعدة البيانات'." },
+            { question: "To create a ready-made database for a store, choose...", answers: [{ text: "Templates", correct: true }, { text: "Blank Database", correct: false }, { text: "Query Wizard", correct: false }], explanation: "التفسير: يوفر Access قوالب (Templates) جاهزة لأنواع شائعة من قواعد البيانات لتسريع عملية الإنشاء." },
+            { question: "The Access program contains a default database called Blank Database.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: عند بدء تشغيل Access، يكون الخيار الأول والأكثر شيوعًا هو إنشاء 'قاعدة بيانات فارغة'." },
+            { question: "Arithmetic or logical operations can be performed on numerical values in data stored in databases.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يمكن إجراء العمليات الحسابية والمنطقية باستخدام الاستعلامات والنماذج والتقارير." },
+            { question: "Reports can be modified after exporting them in TXT format using a word processor program, for example.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: بمجرد تصدير البيانات إلى ملف نصي، يصبح الملف مستقلاً ويمكن تحريره بأي برنامج متوافق." },
+            { question: "... is the requirement that data in the primary key field of the primary table must be present in the foreign key field of the secondary table.", answers: [{ text: "Referential Integrity", correct: true }, { text: "Normalization", correct: false }, { text: "Validation Rule", correct: false }], explanation: "التفسير: 'التكامل المرجعي' يضمن أن العلاقات بين الجداول تظل متسقة." },
+            { question: "The navigation pane is important for facilitating report printing and obtaining a copy of the database data.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: 'جزء التنقل' (Navigation Pane) هو أداة لتنظيم وعرض كائنات قاعدة البيانات (الجداول، الاستعلامات، إلخ)، وليس للطباعة." },
+            { question: "The data type and size in the primary key field must match the foreign field when created.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا شرط أساسي لإنشاء علاقة صالحة بين جدولين." },
+            { question: "It is required that the length of the field name does not exceed 67 characters.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الحد الأقصى لطول اسم الحقل في Access هو 64 حرفًا." },
+            { question: "It is required that the length of the field name does not exceed...", answers: [{ text: "64", correct: true }, { text: "67", correct: false }, { text: "128", correct: false }], explanation: "التفسير: الحد الأقصى المسموح به لأسماء الحقول والكائنات الأخرى في Access هو 64 حرفًا." },
+            { question: "Tables can be created by importing a table from another program, such as a word processor.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن استيراد البيانات من مصادر منظمة مثل Excel أو ملفات نصية، ولكن ليس مباشرة من مستند Word غير منظم." },
+            { question: "A command found in the File tab used to save the database with a new name.", answers: [{ text: "Save As", correct: true }, { text: "Save", correct: false }, { text: "Export", correct: false }], explanation: "التفسير: 'حفظ باسم' (Save As) يُستخدم لإنشاء نسخة جديدة من قاعدة البيانات باسم مختلف." },
+            { question: "The report can be viewed after naming it.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: بعد إنشاء وحفظ التقرير، يمكنك فتحه في أي وقت لعرض البيانات." },
+            { question: "When the required property is set to YES, a value must be entered.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: خاصية 'مطلوب' (Required) تجبر المستخدم على إدخال قيمة في الحقل ولا تسمح بتركه فارغًا." },
+            { question: "The field that distinguishes records from other records and consists of only one field.", answers: [{ text: "Primary key", correct: true }, { text: "Foreign key", correct: false }, { text: "Composite key", correct: false }], explanation: "التفسير: المفتاح الأساسي البسيط يتكون من حقل واحد ويضمن أن كل سجل له معرّف فريد." },
+            { question: "Normalization rules ensure the accuracy of repeated data.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: قواعد التسوية (Normalization) تهدف إلى تقليل أو إزالة تكرار البيانات، وليس ضمان دقته." },
+            { question: "Reports are created through the Design menu and then Create Report.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم إنشاء التقارير من تبويب 'إنشاء' (Create) أولاً." },
+            { question: "The layout of the report format can be specified detailed type.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يوفر Access تخطيطات مختلفة للتقارير مثل 'جدولي' و 'عمودي' و 'ضبط'." },
+            { question: "Export steps cannot be saved.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يوفر Access خيار 'حفظ خطوات التصدير' لإعادة استخدام نفس إعدادات التصدير لاحقًا." },
+            { question: "The relationship of a student to academic results is a one-to-many relationship.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: العلاقة غالبًا ما تكون 'واحد لواحد' (إذا كانت النتيجة النهائية للطالب) أو 'واحد لأطراف' (إذا كانت النتائج هي درجات المواد المختلفة لنفس الطالب)." },
+            { question: "The main window of the database consists of ... sections.", answers: [{ text: "3", correct: true }, { text: "2", correct: false }, { text: "4", correct: false }], explanation: "التفسير: تتكون النافذة الرئيسية عادة من الشريط (Ribbon)، وجزء التنقل (Navigation Pane)، ومساحة عمل الكائن (Object Workspace)." },
+            { question: "Form is a question about the data stored in a table.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: هذا تعريف 'الاستعلام' (Query). النموذج (Form) هو واجهة لإدخال وعرض البيانات." },
+            { question: "The form is used to enter data and display all records at once.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: النموذج عادة ما يعرض سجلاً واحدًا في كل مرة لتسهيل التركيز والإدخال." },
+            { question: "The .... tab contains an Analysis group.", answers: [{ text: "Database Tools", correct: true }, { text: "Create", correct: false }, { text: "Home", correct: false }], explanation: "التفسير: تبويب 'أدوات قاعدة البيانات' يحتوي على أدوات تحليل مثل 'تحليل الأداء' و 'تحليل الجدول'." },
+            { question: "Intermediate Table is used in ... Relationship.", answers: [{ text: "Many to many", correct: true }, { text: "One to one", correct: false }, { text: "One to many", correct: false }], explanation: "التفسير: يتم استخدام جدول وسيط (Junction Table) لتقسيم علاقة 'أطراف بأطراف' إلى علاقتي 'واحد لأطراف'." },
+            { question: "The result obtained from processing data ...", answers: [{ text: "Information", correct: true }, { text: "Data", correct: false }, { text: "Query", correct: false }], explanation: "التفسير: البيانات الخام (Data) عند معالجتها وتنظيمها تصبح معلومات (Information)." },
+            { question: "A single table cannot exist without being connected to another table, otherwise we would not be able to describe this as a database.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن أن تتكون قاعدة بيانات بسيطة من جدول واحد فقط. العلاقات ليست شرطًا لوجود قاعدة البيانات." },
+            { question: "The split form is used to create a form that includes data from several fields from several tables linked together in the same database.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: هذا تعريف 'معالج النماذج' (Form Wizard). النموذج المنقسم (Split Form) يعرض طريقة عرض النموذج وطريقة عرض ورقة البيانات في نفس الوقت." },
+            { question: "The data in the table can be formatted using ... tab.", answers: [{ text: "Home", correct: true }, { text: "Fields", correct: false }, { text: "Table Design", correct: false }], explanation: "التفسير: تبويب 'الشريط الرئيسي' (Home) يحتوي على أدوات تنسيق النص والمحاذاة، والتي يمكن تطبيقها في طريقة عرض ورقة البيانات." },
+            { question: "Reports are objects for displaying and printing data.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو الغرض الرئيسي من التقارير؛ عرض البيانات وتنسيقها بشكل مناسب للطباعة أو العرض." },
+            { question: "The data for the report is modified before it is printed if new data is added.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: التقارير تستمد بياناتها مباشرة من الجداول أو الاستعلامات، لذلك أي تحديث على البيانات المصدر ينعكس تلقائيًا على التقرير." },
+            { question: "It is preferable that the key column fields be ...", answers: [{ text: "numeric", correct: true }, { text: "text", correct: false }, { text: "date", correct: false }], explanation: "التفسير: الحقول الرقمية (خاصة الترقيم التلقائي) تكون أسرع في البحث والفهرسة، مما يجعلها الخيار الأفضل للمفاتيح الأساسية." },
+            { question: "To change the dimensions of the background so that it is suitable for the existing space, Click on the ... Sheet, then from the Details list, choose Form.", answers: [{ text: "Property", correct: true }, { text: "Format", correct: false }, { text: "Data", correct: false }], explanation: "التفسير: 'ورقة الخصائص' (Property Sheet) للنموذج تحتوي على جميع خيارات التنسيق المتقدمة، بما في ذلك خصائص الخلفية." },
+            { question: "A primary key in a table (non-duplicate primary key) and it can be replaced with another alternative field.", answers: [{ text: "Alternative key", correct: true }, { text: "Primary key", correct: false }, { text: "Foreign key", correct: false }], explanation: "التفسير: المفتاح البديل (Alternative Key) هو أي حقل آخر يمكن استخدامه كمعرّف فريد للسجل بدلاً من المفتاح الأساسي." },
+            { question: "Query is a question about the data stored in your tables or a request to perform an action on the data.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو التعريف الدقيق للاستعلام (Query) في سياق قواعد البيانات." },
+            { question: "Use ... as a databases program to store, update, and retrieve data.", answers: [{ text: "Oracle", correct: true }, { text: "Excel", correct: false }, { text: "PowerPoint", correct: false }], explanation: "التفسير: Oracle هو نظام إدارة قواعد بيانات قوي، بينما Excel هو برنامج جداول بيانات و PowerPoint للعروض التقديمية." },
+            { question: "To import data from another file, use ... tab.", answers: [{ text: "External data", correct: true }, { text: "Create", correct: false }, { text: "Database Tools", correct: false }], explanation: "التفسير: تبويب 'بيانات خارجية' مخصص لجميع عمليات استيراد وتصدير البيانات." },
+            { question: "TO add a background to the form, follow these Steps: ...", answers: [{ text: "Format, choose image, choose the appropriate background, click OK", correct: true }, { text: "Design, choose background", correct: false }, { text: "Home, add image", correct: false }], explanation: "التفسير: يمكن إضافة صورة خلفية من خلال ورقة خصائص النموذج (Property Sheet) في تبويب 'تنسيق' (Format)." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-right', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
+
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "صحيح!";
+                feedbackEl.style.color = '#16a34a';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "للأسف، إجابة خاطئة.";
+                feedbackEl.style.color = '#dc2626';
+            }
+
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'عرض النتائج';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'السؤال التالي';
+        }
+
+    </script>
+</body>
+
+</html>

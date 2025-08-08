@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Applications Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .answer-btn.correct {
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
+        }
+
+        .answer-btn.incorrect {
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Mobile Applications Quiz</h1>
+            <p class="text-gray-600 mb-4">Test your knowledge with 54 questions. You have 25 minutes.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">Choose Question Order:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">In
+                        Order</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">Random</button>
+                </div>
+            </div>
+
+            <button id="start-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Start Quiz
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/54</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                Next Question
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
+            <p class="text-gray-600 mb-6">Here's your result:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">Your Score:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
+            </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Restart Quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "The IOS operating system was developed by...", answers: [{ text: "Apple", correct: true }, { text: "Google", correct: false }, { text: "Microsoft", correct: false }], explanation: "Explanation: The iOS operating system is proprietary to Apple and runs exclusively on its devices like the iPhone and iPad." },
+            { question: "In the Google Translate app, instant translation mode can be activated by clicking on ... and then speaking into the microphone.", answers: [{ text: "Conversation", correct: true }, { text: "Camera", correct: false }, { text: "Text", correct: false }], explanation: "Explanation: The 'Conversation' mode is designed for real-time voice translation between two people speaking different languages." },
+            { question: "The Canva app belongs to the ... apps.", answers: [{ text: "Photo & Video Editing", correct: true }, { text: "Social Media", correct: false }, { text: "Productivity", correct: false }], explanation: "Explanation: Canva is a powerful graphic design tool used to create and edit images, videos, and visual designs." },
+            { question: "The Harmony operating system was developed by...", answers: [{ text: "Huawei", correct: true }, { text: "Samsung", correct: false }, { text: "Xiaomi", correct: false }], explanation: "Explanation: Huawei developed the HarmonyOS as its own operating system for its various devices." },
+            { question: "The interface of the Google Docs app is similar to that of other word processing apps such as Apple Pages.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Most word processing applications share a similar basic interface that includes a toolbar and a writing space." },
+            { question: "Within Telegram, users can send messages to groups of up to 200,000 members.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Telegram is known for its support for very large groups (Supergroups) that can have up to 200,000 members." },
+            { question: "Huawei is currently launching smartphones manufactured in the Egyptian market.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Companies like Samsung, Infinix, and vivo are the ones that have factories and manufacture phones in Egypt." },
+            { question: "... are applications programmed for a specific operating system.", answers: [{ text: "Native Apps", correct: true }, { text: "Web Apps", correct: false }, { text: "Hybrid Apps", correct: false }], explanation: "Explanation: Native apps are built with the operating system's specific programming language (like Swift for iOS and Kotlin for Android), which gives them the best performance." },
+            { question: "After verifying the access code, the user is allowed to link credit cards to the electronic wallet to use their balances.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: This is a fundamental security step in all e-wallet applications to ensure that the account owner is the one performing the action." },
+            { question: "Mobile data is used to communicate between two devices over a local network.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Mobile Data is used to connect to the internet through the carrier's network. Wi-Fi is used to connect to local networks." },
+            { question: "Through the Google Lens app, you can photograph a piece of goods to know its price and places of display.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Google Lens uses image recognition technology to search for information about the objects you photograph, including products." },
+            { question: "Automatically launching many apps at the operating system startup does not affect the storage space.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Running apps affects RAM and processor performance, not storage space directly, but it does slow down the device." },
+            { question: "To lock an Android mobile or erase its data remotely, make sure that the battery charge should not be less than...", answers: [{ text: "50%", correct: true }, { text: "20%", correct: false }, { text: "80%", correct: false }], explanation: "Explanation: Some critical operations like updates or remote wipes require a sufficient battery level to ensure the process isn't interrupted." },
+            { question: "Within the Tiktok application, users can shoot a video clip next to another video, and this feature is called Deep Duo.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The feature is called 'Duet'." },
+            { question: "... is a note-taking app developed by Google.", answers: [{ text: "Keep", correct: true }, { text: "Evernote", correct: false }, { text: "OneNote", correct: false }], explanation: "Explanation: Google Keep is Google's simple and fast note-taking app." },
+            { question: "The Google Meet app allows the creation of free meetings with up to ... participants.", answers: [{ text: "100", correct: true }, { text: "50", correct: false }, { text: "250", correct: false }], explanation: "Explanation: In the free version of Google Meet, the maximum number of participants is 100." },
+            { question: "The phone and Wi-Fi router are connected via Bluetooth.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The connection between the phone and the router is made using Wi-Fi technology itself, not Bluetooth." },
+            { question: "Google apps are currently known as G Suite.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: The name G Suite was changed to Google Workspace, but G Suite was the previous name for the suite of apps." },
+            { question: "Dustin Moskovitz is one of the three founders of Facebook, along with Chris Hughes and Mark Zuckerberg.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Dustin Moskovitz was one of the five co-founders of Facebook." },
+            { question: "In the past, the YouTube application used Adobe Flash technology to display animated clips.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Before transitioning to HTML5, Adobe Flash was the primary video player on YouTube and the web in general." },
+            { question: "... is a social networking application for recording, broadcasting and sharing video messages for a specific period of time.", answers: [{ text: "Snap Chat", correct: true }, { text: "Instagram", correct: false }, { text: "TikTok", correct: false }], explanation: "Explanation: Snapchat is famous for its feature of messages and photos that disappear after a short period." },
+            { question: "Progressive web applications have the advantage of providing a shortcut to the web site within the mobile.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: One of the key features of a PWA is the ability to be 'installed' on the phone's home screen to function like a regular app." },
+            { question: "In Google Maps app, you can change the day or hour of travel to find the best route before departure.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Google Maps allows you to set a departure or arrival time to estimate traffic and provide the best route accordingly." },
+            { question: "Logging in with your academic college email unlocks the premium paid features within Microsoft 365 apps.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Many universities and educational institutions have subscriptions with Microsoft that provide students with free access to paid features." },
+            { question: "The Startup Manager controls the permission apps settings.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The Startup Manager controls which apps start automatically when the device boots up, while permissions are controlled in the 'Permissions' section of the settings." },
+            { question: "'Find my phone' is automatically activated if a ... account is added to your mobile.", answers: [{ text: "Google", correct: true }, { text: "Samsung", correct: false }, { text: "Microsoft", correct: false }], explanation: "Explanation: The 'Find My Device' feature is linked to the Google account registered on the Android phone." },
+            { question: "... controls the number of apps that can run concurrently.", answers: [{ text: "RAM", correct: true }, { text: "Processor", correct: false }, { text: "Storage", correct: false }], explanation: "Explanation: RAM (Random Access Memory) is responsible for holding the data of active applications; the more RAM, the more apps can run smoothly." },
+            { question: "It is recommended that the screen turn off automatically after 30 minutes of non-use to conserve battery.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: To conserve battery, it's recommended to set the screen to turn off after a very short period, like 30 seconds or 1 minute." },
+            { question: "You can delete some of the system applications already installed on your Android phone.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Core system apps cannot be easily deleted, but they can be 'disabled' to prevent them from running." },
+            { question: "A MicroSD external memory is a way to protect the phone screen from scratches or breakage.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: External memory is used to increase storage space. Screen protection is achieved using screen protectors." },
+            { question: "The 'Lightroom' app belongs to virtual meeting apps.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Lightroom is a professional photo editing application from Adobe." },
+            { question: "The UBER app is considered a...", answers: [{ text: "Hybrid App", correct: true }, { text: "Native App", correct: false }, { text: "Web App", correct: false }], explanation: "Explanation: Hybrid apps are web apps wrapped in a native container, allowing them to work on multiple platforms with a single codebase." },
+            { question: "Google provides a security tool for scanning applications to avoid harmful behaviors called...", answers: [{ text: "Google Play Protect", correct: true }, { text: "Google Safe Browsing", correct: false }, { text: "Google Authenticator", correct: false }], explanation: "Explanation: Google Play Protect is a built-in service in the Play Store that scans apps for malware." },
+            { question: "The card verification value written on the back of the bank card must not be seen by anyone except the card owner.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: This number (CVV) is a vital security code used for verifying online transactions and must be kept confidential." },
+            { question: "Two-Factor Authentication mode is a method with two keys to log in to your account.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Two-Factor Authentication (2FA) requires two methods of verification (like a password and a code on your phone) to increase security." },
+            { question: "The... platform helped to publish over 500,000 apps so far.", answers: [{ text: "Apps-builder", correct: true }, { text: "Good Barber", correct: false }, { text: "MobinCube", correct: false }], explanation: "Explanation: Apps-builder is one of the platforms that allows creating apps without coding." },
+            { question: "The Facebook community expanded to include any college student, then high school students, and finally anyone of age...", answers: [{ text: "13 years old", correct: true }, { text: "16 years old", correct: false }, { text: "18 years old", correct: false }], explanation: "Explanation: The minimum age to create a Facebook account is 13." },
+            { question: "BlueMail is a secure email application that is available for free in the Google Play Store and not for free on the iPhone and iPad stores.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The BlueMail app is free on both Android and iOS." },
+            { question: "The 'Filmora' app belongs to the apps of editing photos and videos.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Filmora (formerly FilmoraGo on mobile) is a popular and user-friendly video editor." },
+            { question: "Through the ..... platform, you can control all the details of the application without using one code.", answers: [{ text: "Good Barber", correct: true }, { text: "Android Studio", correct: false }, { text: "Xcode", correct: false }], explanation: "Explanation: Good Barber is an app builder platform that does not require writing code." },
+            { question: "A QR Code is a developed version or ... From the Barcode.", answers: [{ text: "Second", correct: true }, { text: "First", correct: false }, { text: "Third", correct: false }], explanation: "Explanation: The QR (Quick Response) code is considered the second generation of barcodes, as it can store more information in two dimensions." },
+            { question: "The Find My Phone feature allows you to update locations apps.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The 'Find My Phone' feature is for locating, locking, or wiping a lost phone remotely." },
+            { question: "It is recommended to update the Google Maps app to obtain the new features that the app may provide.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Regularly updating apps is important for getting the latest features, performance improvements, and security fixes." },
+            { question: "Secure shopping websites and e-stores start with the website domain HTTP.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Secure sites that encrypt data between you and the site start with HTTPS (the 'S' stands for Secure)." },
+            { question: "The Google ... app is known as a powerful tool that helps in scheduling appointments effectively.", answers: [{ text: "Calendar", correct: true }, { text: "Keep", correct: false }, { text: "Docs", correct: false }], explanation: "Explanation: The Google Calendar app is the dedicated tool for managing appointments and events." },
+            { question: "The Google ... app is known as a powerful tool that helps in scheduling events.", answers: [{ text: "Calendar", correct: true }, { text: "Tasks", correct: false }, { text: "Sheets", correct: false }], explanation: "Explanation: Google Calendar is used to organize and schedule all kinds of events and appointments." },
+            { question: "WhatsApp is a decentralized messaging service.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: WhatsApp is a centralized service, as all messages pass through the servers of Meta (Facebook)." },
+            { question: "Tablets are equipped with screens starting from 7 inches and up to 12 inches.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: This is the common size range for most tablet devices." },
+            { question: "GPS relies on Internet data.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: GPS relies on receiving signals from satellites to determine location and can work without an internet connection." },
+            { question: "... connects the smartphone to the local network and connects it to the Internet.", answers: [{ text: "Wi-fi", correct: true }, { text: "Bluetooth", correct: false }, { text: "NFC", correct: false }], explanation: "Explanation: Wi-Fi technology is responsible for connecting devices to local networks (like a home router) and from there to the internet." },
+            { question: "Snapseed can be considered a social media app.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Snapseed is an advanced photo editing app from Google, not a social media platform." },
+            { question: "Code.... Is a passcode that is valid for several minutes to secure banking transactions and online purchases.", answers: [{ text: "OTP (One Time Password)", correct: true }, { text: "PIN", correct: false }, { text: "CVV", correct: false }], explanation: "Explanation: An OTP (One-Time Password) is a temporary code used as an extra layer of security to verify transactions." },
+            { question: "The platform that provides a powerful editor with great possibilities in the visual display.", answers: [{ text: "MobinCube", correct: true }, { text: "Apps-builder", correct: false }, { text: "Good Barber", correct: false }], explanation: "Explanation: MobinCube is one of the app builder platforms that focuses on providing extensive visual customization options." },
+            { question: "Applications that use one global language such as JavaScript.", answers: [{ text: "Cross-Platform applications", correct: true }, { text: "Native applications", correct: false }, { text: "Web applications", correct: false }], explanation: "Explanation: Cross-platform applications are built once using frameworks like React Native or Flutter to run on both iOS and Android." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-left', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
+
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "Correct!";
+                feedbackEl.style.color = '#16a34a';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "Sorry, that's not right.";
+                feedbackEl.style.color = '#dc2626';
+            }
+
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'Show Results';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'Next Question';
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Search Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .answer-btn.correct {
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
+        }
+
+        .answer-btn.incorrect {
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Web Search Skills Quiz</h1>
+            <p class="text-gray-600 mb-4">Test your knowledge with 29 questions. You have 25 minutes.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">Choose Question Order:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">In
+                        Order</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">Random</button>
+                </div>
+            </div>
+
+            <button id="start-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Start Quiz
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/29</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                Next Question
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
+            <p class="text-gray-600 mb-6">Here's your result:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">Your Score:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
+            </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Restart Quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "Secure shopping websites and e-stores start with the website domain HTTP.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Secure sites that encrypt data start with HTTPS. The 'S' stands for Secure." },
+            { question: "The journal's impact factor is based on calculating the number of times articles are searched for during a given year in the journal.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Impact Factor is based on the average number of citations received by articles in that journal, not how many times they are searched for." },
+            { question: "Using the Google search engine, if you want to know who cited a Washington Post article on their site, what is the correct structure of the search sentence?", answers: [{ text: "link:washingtonpost.com", correct: true }, { text: "related:washingtonpost.com", correct: false }, { text: "site:washingtonpost.com", correct: false }], explanation: "Explanation: The `link:` operator in Google Search finds pages that link to a specific domain or URL." },
+            { question: "The words you type in a search field to get your results are called...", answers: [{ text: "Search terms", correct: true }, { text: "Keywords", correct: false }, { text: "Queries", correct: false }], explanation: "Explanation: 'Search terms' is the most accurate description for the words entered by a user into a search engine." },
+            { question: "The Database ... enables you to merge more than one account of the same author.", answers: [{ text: "Scopus", correct: true }, { text: "Web of Science", correct: false }, { text: "ProQuest", correct: false }], explanation: "Explanation: Scopus provides an 'Author Profile' feature that allows authors to merge different profiles and correct their publication lists." },
+            { question: "The Egyptian Knowledge Bank (EKB) offers a range of online workshops.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: The EKB regularly hosts webinars and workshops to train users on how to effectively use its various resources." },
+            { question: "Boolean operations cannot be used when searching within a ProQuest database.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Boolean operators (AND, OR, NOT) are fundamental search tools supported by almost all academic databases, including ProQuest." },
+            { question: "Scopus sources are accessed through the ELSEVIER database.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Scopus is a product of the publisher Elsevier, and it is one of their flagship database services." },
+            { question: "The user can access Clarivate from the Sources menu in the Egyptian Knowledge Bank.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Clarivate, which owns Web of Science, is one of the major publishers and resources available through the EKB portal." },
+            { question: "SCImago displays SCOPUS metrics for a journal according a year.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: The SCImago Journal Rank (SJR) portal uses data from the Scopus database to provide its journal metrics and rankings." },
+            { question: "The search engine comprehensively scans the network to obtain results when you enter search words.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Search engines do not scan the entire web in real-time. They search their own pre-built index of the web, which is constantly updated by web crawlers." },
+            { question: "The website... allows you to use EndNote Online for free.", answers: [{ text: "Clarivate", correct: true }, { text: "Elsevier", correct: false }, { text: "EBSCO", correct: false }], explanation: "Explanation: EndNote is a reference management software owned by Clarivate, and access is often provided through institutional subscriptions like Web of Science." },
+            { question: "Using Google, if you want to find a website similar to eBay, what is the correct syntax for your search term?", answers: [{ text: "related:ebay.com", correct: true }, { text: "similar:ebay.com", correct: false }, { text: "like:ebay.com", correct: false }], explanation: "Explanation: The `related:` operator is a Google search command used to find websites that are similar to a given URL." },
+            { question: "Dar Al-Mandumah's index contains a group of subsections.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Dar Al-Mandumah is a major database for Arabic content and is organized into various sub-databases and sections based on subject matter." },
+            { question: "The document can be saved for viewing on the web with the HMT extension.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The correct file extensions for web pages are .html or .htm." },
+            { question: "Use advanced search to ..... your results.", answers: [{ text: "Narrow", correct: true }, { text: "Expand", correct: false }, { text: "Summarize", correct: false }], explanation: "Explanation: Advanced search is designed to add more specific criteria (like date, author, or publication) to narrow down the search and get more relevant results." },
+            { question: "The data source in SCImago is...", answers: [{ text: "Scopus", correct: true }, { text: "Web of Science", correct: false }, { text: "Google Scholar", correct: false }], explanation: "Explanation: SCImago is a portal that visualizes and analyzes data drawn exclusively from the Scopus database." },
+            { question: "Advanced search in WOS is used to narrow your search according to specific criteria.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Web of Science (WOS) provides advanced search features to help researchers pinpoint specific articles by adding multiple search fields and criteria." },
+            { question: "Use... to expand your search.", answers: [{ text: "OR", correct: true }, { text: "AND", correct: false }, { text: "NOT", correct: false }], explanation: "Explanation: The Boolean operator OR is used to find results that contain either of the search terms, thus broadening the search." },
+            { question: "SJR enables you to arrange journals in your field and filter them by topic, but it is difficult to classify them by year.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: The SCImago Journal Rank (SJR) portal allows for easy filtering and classification by year, subject area, and other criteria." },
+            { question: "The Scopus database is a powerful tool if you want to compare journals in the same subject category.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Scopus provides various metrics like CiteScore and SJR that are used to compare the impact and performance of journals." },
+            { question: "... refers to the technical 'gateway' used to access resources on a web server.", answers: [{ text: "Port", correct: true }, { text: "Protocol", correct: false }, { text: "Domain", correct: false }], explanation: "Explanation: A port is a specific endpoint for communication in an operating system. Web traffic, for example, typically uses port 80 (HTTP) or 443 (HTTPS)." },
+            { question: "Using a hyphen (-) when searching on Google leads to reducing the search results.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: The hyphen (-) acts as a NOT operator, excluding any results that contain the word immediately following it, thus narrowing the results." },
+            { question: "An indicator that is considered a measure of the scientific influence of scientific journals that explains the status of the journals from which citations come is...", answers: [{ text: "SCImago Journal Rank", correct: true }, { text: "Impact Factor", correct: false }, { text: "H-index", correct: false }], explanation: "Explanation: The SCImago Journal Rank (SJR) is a metric that measures a journal's prestige based on the idea that 'all citations are not created equal'." },
+            { question: "You can use OneDrive as a cloud drive within the ... tab", answers: [{ text: "App launcher icon", correct: true }, { text: "Home tab", correct: false }, { text: "View tab", correct: false }], explanation: "Explanation: In online Microsoft 365 services, the app launcher (the icon with nine dots) is used to switch between different applications like Outlook, Word, and OneDrive." },
+            { question: "The...platform is the product of cooperation between the Al-Alfi Foundation for Human and Social Development, the Ministry of Higher Education.", answers: [{ text: "Ejada", correct: true }, { text: "EKB", correct: false }, { text: "Thales", correct: false }], explanation: "Explanation: Ejada is a specific educational platform resulting from this collaboration in Egypt." },
+            { question: "When you click on the name of the magazine or periodical in WOS, the impact factor of the magazine or periodical is displayed.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: Clicking on a journal's title in Web of Science (WOS) typically leads to a profile page that includes its key metrics, such as the Journal Impact Factor (JIF)." },
+            { question: "The Arabic Index for reference Citations enables you to write search terms in Arabic only.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "Explanation: Most modern databases, including those for Arabic content, support searching in both Arabic and English to maximize results." },
+            { question: "All Photos posted on Unsplash are free to copy, modify, and distribute, including for commercial purposes.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "Explanation: This describes the Unsplash license, which is very permissive and allows for wide use of the images on their platform." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-left', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
+
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "Correct!";
+                feedbackEl.style.color = '#16a34a';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "Sorry, that's not right.";
+                feedbackEl.style.color = '#dc2626';
+            }
+
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'Show Results';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'Next Question';
+        }
+
+    </script>
+</body>
+
+</html>
