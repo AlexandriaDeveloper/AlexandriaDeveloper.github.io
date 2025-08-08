@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PowerPoint Quiz</title>
+    <title>اختبار PowerPoint</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Cairo', sans-serif;
         }
 
         .quiz-container {
@@ -47,6 +47,14 @@
             background-color: #f3f4f6;
             /* gray-100 */
         }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
     </style>
 </head>
 
@@ -56,18 +64,29 @@
 
         <!-- Start Screen -->
         <div id="start-screen" class="text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">PowerPoint Skills Quiz</h1>
-            <p class="text-gray-600 mb-6">Test your knowledge with 66 questions. You have 25 minutes.</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اختبار مهارات PowerPoint</h1>
+            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 67 سؤالاً. لديك 25 دقيقة.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">اختر ترتيب الأسئلة:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">بالترتيب</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">عشوائي</button>
+                </div>
+            </div>
+
             <button id="start-btn"
                 class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
-                Start Quiz
+                ابدأ الاختبار
             </button>
         </div>
 
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/66</h2>
+                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/67</h2>
                 <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
                 </div>
             </div>
@@ -82,23 +101,27 @@
 
             <div id="feedback" class="mt-4 text-center font-medium"></div>
 
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
             <button id="next-btn"
                 class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
-                Next Question
+                السؤال التالي
             </button>
         </div>
 
         <!-- Results Screen -->
         <div id="results-screen" class="hidden text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
-            <p class="text-gray-600 mb-6">Here's your result:</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">اكتمل الاختبار!</h1>
+            <p class="text-gray-600 mb-6">هذه هي نتيجتك:</p>
             <div class="bg-indigo-100 p-6 rounded-xl mb-6">
-                <p class="text-lg text-gray-700">Your Score:</p>
+                <p class="text-lg text-gray-700">نتيجتك:</p>
                 <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
             </div>
             <button id="restart-btn"
                 class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
-                Restart Quiz
+                إعادة الاختبار
             </button>
         </div>
 
@@ -107,70 +130,72 @@
     <script>
         // --- QUIZ DATA ---
         const questions = [
-            { question: "When you create a new blank presentation, it begins with a slide whose layout is the title slide.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "When you create a new, blank presentation, the title slide layout name begins with one slide.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "One element can carry more than one movement.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "The main bar includes commands for references.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "Why use outline view?", answers: [{ text: "To edit bulleted addresses", correct: true }, { text: "To change the slide design", correct: false }, { text: "To add images", correct: false }] },
-            { question: "To change the table style from the ... tab.", answers: [{ text: "Design", correct: true }, { text: "Layout", correct: false }, { text: "Insert", correct: false }] },
-            { question: "How can you save layouts, colors, fonts, effects, background styles, and content for others to use with their presentations?", answers: [{ text: "Export the file as a template", correct: true }, { text: "Save as PDF", correct: false }, { text: "Send by email", correct: false }] },
-            { question: "When splitting slides into sections, we can collapse, expand, rename or remove a section.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "You can add a chart or graph to a slide using the View tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "The order of items within a slide can be changed by changing the order of the slides.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To record the screen, we click...", answers: [{ text: "Insert -> Screen Recording", correct: true }, { text: "View -> Record", correct: false }, { text: "File -> Record", correct: false }] },
-            { question: "How do you resize a table after inserting it?", answers: [{ text: "By dragging its edges", correct: true }, { text: "From the 'Format' menu", correct: false }, { text: "It cannot be resized", correct: false }] },
-            { question: "From one of the ways to create a presentation, press the Windows key and then choose PowerPoint.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "What command is used to add animation effects to items on slides?", answers: [{ text: "Add effects", correct: true }, { text: "Animations Tab", correct: false }, { text: "Transitions Tab", correct: false }] },
-            { question: "The appropriate view can be chosen from a set of Presentation Views commands such as Normal and Slide Sorter.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "The appropriate tab to change the background color of a table cell in PowerPoint is...", answers: [{ text: "Table Design", correct: true }, { text: "Home", correct: false }, { text: "Layout", correct: false }] },
-            { question: "When you save a presentation with a .potx extension, what kind of PowerPoint file is generated?", answers: [{ text: "Template", correct: true }, { text: "PowerPoint Show", correct: false }, { text: "Video File", correct: false }] },
-            { question: "To animate a three-dimensional model in slides...", answers: [{ text: "Click and drag", correct: true }, { text: "Use the arrow keys", correct: false }, { text: "It cannot be animated", correct: false }] },
-            { question: "There is only one way to insert a new blank slide for your presentation.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "... is a set of pre-made fonts, colors, and special effects that complement each other.", answers: [{ text: "Design", correct: true }, { text: "Theme", correct: false }, { text: "Style", correct: false }] },
-            { question: "What happens when I press the Esc key while playing a slideshow?", answers: [{ text: "Slideshow ends", correct: true }, { text: "Go to the next slide", correct: false }, { text: "The show is paused", correct: false }] },
-            { question: "To format the background of a specific slide or group of slides, use the tab...", answers: [{ text: "Design -> Apply to all", correct: true }, { text: "View -> Apply to all", correct: false }, { text: "Insert -> Background", correct: false }] },
-            { question: "After making a wide range of formatting for colors, fonts and effects, they can be saved in a specific format on the computer to be used later.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "In the 'Sound' group, you can control the duration of the transition and even determine the sound that plays during the transition.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "The language of the program interface can be changed by tabbing the transitions.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "The presentation file can be saved as a video file.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "Animations can change the size and color of an element within a slide.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "You can save the PowerPoint file on OneDrive to access it from any device and from anywhere.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "Formatting and layout freeze when saving presentation as a ... file.", answers: [{ text: "PDF", correct: true }, { text: "PNG", correct: false }, { text: "DOCX", correct: false }] },
-            { question: "To save the presentation in the latest presentation format, we choose to save with the extension...", answers: [{ text: ".pptx", correct: true }, { text: ".ppt", correct: false }, { text: ".ppsx", correct: false }] },
-            { question: "To save the presentation for a PowerPoint show, we choose...", answers: [{ text: ".ppsx", correct: true }, { text: ".pptx", correct: false }, { text: ".potx", correct: false }] },
-            { question: "To save the presentation to a previous version of PowerPoint, we choose to save with the extension...", answers: [{ text: ".ppt", correct: true }, { text: ".pptx", correct: false }, { text: ".pps", correct: false }] },
-            { question: "To save the presentation to a previous version for a PowerPoint show, we choose...", answers: [{ text: ".pps", correct: true }, { text: ".ppt", correct: false }, { text: ".ppsx", correct: false }] },
-            { question: "The presentation can be printed in grayscale.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "Animations have 5 types in PowerPoint.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To do background formatting from the view tab, you can apply the background to the selected slide only or apply it to all slides.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To adjust the brightness and contrast in the picture, press the color balance tool.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To add an icon in the slide:", answers: [{ text: "Go to Insert tab and choose icon", correct: true }, { text: "Go to Design tab and choose icon", correct: false }, { text: "Go to View tab and choose icon", correct: false }] },
-            { question: "The chart title appears in the slide below the chart.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "When you insert a shape to the slide, it appears automatically.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "One of the printing colors available to print the presentation file is to print in blue only.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To change the color of the SmartArt graphic:", answers: [{ text: "Use the Format tab", correct: true }, { text: "Use the Design tab", correct: false }, { text: "Double-click on it", correct: false }] },
-            { question: "To add an ....... in a SmartArt graphic, right-click on the shape and choose 'Add Shape'.", answers: [{ text: "additional shape", correct: true }, { text: "new slide", correct: false }, { text: "hyperlink", correct: false }] },
-            { question: "Slide transition is the visual effect that occurs when moving from one slide to another.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "To add 3D effects to the shape, click on format and shape effect.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "The background of the current slide can be filled with an image from your computer or an image downloaded from the internet.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "You can insert multiple icons at the same time.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "Click on ... to add WordArt.", answers: [{ text: "Insert", correct: true }, { text: "Design", correct: false }, { text: "Home", correct: false }] },
-            { question: "You can apply background formatting from the ... tab.", answers: [{ text: "Design", correct: true }, { text: "View", correct: false }, { text: "File", correct: false }] },
-            { question: "To trim the edge of media, click on 'Trim Video' from the ... tab.", answers: [{ text: "Playback", correct: true }, { text: "Format", correct: false }, { text: "Animations", correct: false }] },
-            { question: "To change the order of shapes in a SmartArt graphic, Click Ctrl + T on your keyboard.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "To open a previously saved presentation file, we press the keys Ctrl + O.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "One of the most common types of Picture formats used in online presentations is GIF.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "The purpose of The Table Design Tab in PowerPoint is to...", answers: [{ text: "Customize table formatting", correct: true }, { text: "Insert rows and columns", correct: false }, { text: "Merge cells", correct: false }] },
-            { question: "This layout contains the main title and subtitle...", answers: [{ text: "Title Slide", correct: true }, { text: "Title and Content", correct: false }, { text: "Blank", correct: false }] },
-            { question: "You can use ...... to delete the border between table cells.", answers: [{ text: "Eraser", correct: true }, { text: "Pen", correct: false }, { text: "Selection tool", correct: false }] },
-            { question: "The text you add becomes part of the shape and if you rotate the shape the text will also rotate.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "To add graphs, click...", answers: [{ text: "Insert and then chart", correct: true }, { text: "Design and then chart", correct: false }, { text: "Data and then chart", correct: false }] },
-            { question: "The best practice for using pictures in a presentation to ensure audience appeal is to avoid pictures.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }] },
-            { question: "The best practice for using pictures in a presentation to ensure audience appeal is to avoid too many pictures.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "It is best to avoid mixing drawn images with photographs.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }] },
-            { question: "The shape outline on the Home tab is in the ... group.", answers: [{ text: "Drawing", correct: true }, { text: "Font", correct: false }, { text: "Paragraph", correct: false }] },
-            { question: "... is used to navigate from the current page to another Web Site or File.", answers: [{ text: "Hyperlink", correct: true }, { text: "Bookmark", correct: false }, { text: "Comment", correct: false }] },
-            { question: "If you want to add a comment about a chart you can use a...", answers: [{ text: "Text box", correct: true }, { text: "Caption", correct: false }, { text: "Footer", correct: false }] }
+            { question: "When you create a new blank presentation, it begins with a slide whose layout is the title slide.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو السلوك الافتراضي في PowerPoint لتوجيه المستخدم للبدء بعنوان للعرض التقديمي." },
+            { question: "When you create a new, blank presentation, the title slide layout name begins with one slide.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: العرض التقديمي الجديد يبدأ بشريحة واحدة فقط، وتخطيط هذه الشريحة هو 'شريحة العنوان' وليس العكس." },
+            { question: "One element can carry more than one movement.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يمكنك إضافة حركة دخول وتوكيد وخروج لنفس الكائن من خلال 'جزء الحركة'." },
+            { question: "The main bar includes commands for references.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: تبويب 'المراجع' هو ميزة خاصة ببرنامج Word وغير موجودة في PowerPoint." },
+            { question: "Why use outline view?", answers: [{ text: "To edit bulleted addresses", correct: true }, { text: "To change the slide design", correct: false }, { text: "To add images", correct: false }], explanation: "التفسير: عرض المخطط التفصيلي يركز على المحتوى النصي للشرائح، مما يسهل تنظيم هيكل العرض التقديمي." },
+            { question: "To change the table style from the ... tab.", answers: [{ text: "Design", correct: true }, { text: "Layout", correct: false }, { text: "Insert", correct: false }], explanation: "التفسير: عند تحديد جدول، يظهر تبويب سياقي باسم 'تصميم الجدول' يحتوي على خيارات التنسيق." },
+            { question: "To change the table style, we click Table Tools/Design tab, then select the table style you want.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه هي الطريقة الصحيحة لتطبيق أنماط منسقة مسبقًا على جدول." },
+            { question: "How can you save layouts, colors, fonts, effects, background styles, and content for others to use with their presentations?", answers: [{ text: "Export the file as a template", correct: true }, { text: "Save as PDF", correct: false }, { text: "Send by email", correct: false }], explanation: "التفسير: حفظ الملف كقالب (.potx) يجمع كل عناصر التصميم في ملف واحد لإعادة استخدامها بسهولة." },
+            { question: "When splitting slides into sections, we can collapse, expand, rename or remove a section.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: الأقسام هي أدوات تنظيمية في جزء الصور المصغرة يمكن إدارتها بهذه الطريقة." },
+            { question: "You can add a chart or graph to a slide using the View tab.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم إدراج جميع الكائنات مثل المخططات والصور من خلال تبويب 'إدراج'." },
+            { question: "The order of items within a slide can be changed by changing the order of the slides.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: ترتيب الشرائح يغير تسلسل العرض، بينما ترتيب العناصر داخل الشريحة يتم من خلال 'جزء التحديد'." },
+            { question: "To record the screen, we click...", answers: [{ text: "Insert -> Screen Recording", correct: true }, { text: "View -> Record", correct: false }, { text: "File -> Record", correct: false }], explanation: "التفسير: تسجيل الشاشة يعتبر من الوسائط، ولذلك يوجد ضمن تبويب 'إدراج'." },
+            { question: "How do you resize a table after inserting it?", answers: [{ text: "By dragging its edges", correct: true }, { text: "From the 'Format' menu", correct: false }, { text: "It cannot be resized", correct: false }], explanation: "التفسير: تحتوي حدود وزوايا الجدول على مقابض يمكن سحبها لتغيير الحجم." },
+            { question: "From one of the ways to create a presentation, press the Windows key and then choose PowerPoint.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه طريقة قياسية لتشغيل أي تطبيق مثبت على نظام Windows." },
+            { question: "What command is used to add animation effects to items on slides?", answers: [{ text: "Add effects", correct: true }, { text: "Animations Tab", correct: false }, { text: "Transitions Tab", correct: false }], explanation: "التفسير: زر 'إضافة حركة' (Add Animation/Effects) داخل تبويب 'حركات' هو المستخدم لإضافة تأثيرات متعددة." },
+            { question: "The appropriate view can be chosen from a set of Presentation Views commands such as Normal and Slide Sorter.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: يحتوي تبويب 'عرض' على جميع طرق عرض الشرائح المختلفة." },
+            { question: "The appropriate tab to change the background color of a table cell in PowerPoint is...", answers: [{ text: "Table Design", correct: true }, { text: "Home", correct: false }, { text: "Layout", correct: false }], explanation: "التفسير: يظهر تبويب 'تصميم الجدول' عند تحديد جدول ويحتوي على خيار 'التظليل' لتلوين الخلايا." },
+            { question: "When you save a presentation with a .potx extension, what kind of PowerPoint file is generated?", answers: [{ text: "Template", correct: true }, { text: "PowerPoint Show", correct: false }, { text: "Video File", correct: false }], explanation: "التفسير: الحرف 't' في الامتداد .potx يرمز إلى 'template' أي قالب." },
+            { question: "To animate a three-dimensional model in slides...", answers: [{ text: "Click and drag", correct: true }, { text: "Use the arrow keys", correct: false }, { text: "It cannot be animated", correct: false }], explanation: "التفسير: النماذج ثلاثية الأبعاد تحتوي على مقبض تحكم مركزي يسمح بالدوران الحر عند السحب." },
+            { question: "There is only one way to insert a new blank slide for your presentation.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يمكن إدراج شريحة جديدة من تبويب الشريط الرئيسي، أو بالنقر بزر الماوس الأيمن، أو باختصار Ctrl+M." },
+            { question: "... is a set of pre-made fonts, colors, and special effects that complement each other.", answers: [{ text: "Design", correct: true }, { text: "Theme", correct: false }, { text: "Style", correct: false }], explanation: "التفسير: هذا هو تعريف 'النسق' (Theme)، والذي يتم التحكم به من تبويب 'تصميم'." },
+            { question: "What happens when I press the Esc key while playing a slideshow?", answers: [{ text: "Slideshow ends", correct: true }, { text: "Go to the next slide", correct: false }, { text: "The show is paused", correct: false }], explanation: "التفسير: مفتاح 'Esc' هو الاختصار العالمي للخروج من وضع ملء الشاشة في معظم التطبيقات." },
+            { question: "To format the background of a specific slide or group of slides, use the tab...", answers: [{ text: "Design -> Apply to all", correct: true }, { text: "View -> Apply to all", correct: false }, { text: "Insert -> Background", correct: false }], explanation: "التفسير: تبويب 'تصميم' يحتوي على 'تنسيق الخلفية' مع خيار 'تطبيق على الكل'." },
+            { question: "After making a wide range of formatting for colors, fonts and effects, they can be saved in a specific format on the computer to be used later.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو الغرض من إنشاء وحفظ نسق (Theme) أو قالب (Template) مخصص." },
+            { question: "In the 'Sound' group, you can control the duration of the transition and even determine the sound that plays during the transition.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الصوت والمدة هما جزء من مجموعة 'التوقيت' في تبويب الانتقالات." },
+            { question: "The language of the program interface can be changed by tabbing the transitions.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: إعدادات اللغة العامة للبرنامج توجد في قائمة ملف -> خيارات." },
+            { question: "The presentation file can be saved as a video file.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: قائمة ملف -> تصدير توفر خيار إنشاء فيديو من العرض التقديمي." },
+            { question: "Animations can change the size and color of an element within a slide.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: حركات التوكيد (Emphasis) مصممة خصيصًا لتغيير خصائص الكائن مثل حجمه أو لونه." },
+            { question: "You can save the PowerPoint file on OneDrive to access it from any device and from anywhere.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: OneDrive هو خدمة التخزين السحابي من مايكروسوفت والمتكاملة مع برامج Office." },
+            { question: "Formatting and layout freeze when saving presentation as a ... file.", answers: [{ text: "PDF", correct: true }, { text: "PNG", correct: false }, { text: "DOCX", correct: false }], explanation: "التفسير: تم تصميم صيغة PDF للحفاظ على شكل المستند ثابتًا وغير قابل للتعديل بسهولة." },
+            { question: "To save the presentation in the latest presentation format, we choose to save with the extension...", answers: [{ text: ".pptx", correct: true }, { text: ".ppt", correct: false }, { text: ".ppsx", correct: false }], explanation: "التفسير: الحرف 'x' في نهاية امتدادات ملفات Office الحديثة (مثل .pptx) يدل على أنها مبنية على XML." },
+            { question: "To save the presentation for a PowerPoint show, we choose...", answers: [{ text: ".ppsx", correct: true }, { text: ".pptx", correct: false }, { text: ".potx", correct: false }], explanation: "التفسير: امتداد .ppsx يفتح الملف في وضع عرض الشرائح مباشرةً." },
+            { question: "To save the presentation to a previous version of PowerPoint, we choose to save with the extension...", answers: [{ text: ".ppt", correct: true }, { text: ".pptx", correct: false }, { text: ".pps", correct: false }], explanation: "التفسير: امتداد .ppt مخصص للتوافق مع الإصدارات القديمة (97-2003)." },
+            { question: "To save the presentation to a previous version for a PowerPoint show, we choose...", answers: [{ text: ".pps", correct: true }, { text: ".ppt", correct: false }, { text: ".ppsx", correct: false }], explanation: "التفسير: امتداد .pps هو صيغة العرض فقط للإصدارات القديمة." },
+            { question: "The presentation can be printed in grayscale.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: توفر إعدادات الطباعة خيارات للألوان لتوفير الحبر، بما في ذلك تدرج الرمادي." },
+            { question: "Animations have 5 types in PowerPoint.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: هناك أربع فئات رئيسية للحركات: الدخول، والتوكيد، والخروج، ومسارات الحركة." },
+            { question: "To do background formatting from the view tab, you can apply the background to the selected slide only or apply it to all slides.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: أدوات تنسيق الخلفية موجودة في تبويب 'تصميم' وليس 'عرض'." },
+            { question: "To adjust the brightness and contrast in the picture, press the color balance tool.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم ضبط السطوع والتباين من أداة 'تصحيحات' (Corrections) في تبويب تنسيق الصورة." },
+            { question: "To add an icon in the slide:", answers: [{ text: "Go to Insert tab and choose icon", correct: true }, { text: "Go to Design tab and choose icon", correct: false }, { text: "Go to View tab and choose icon", correct: false }], explanation: "التفسير: الأيقونات هي نوع من الرسومات، لذلك يتم إدراجها من تبويب 'إدراج'." },
+            { question: "The chart title appears in the slide below the chart.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: بشكل افتراضي، يظهر عنوان المخطط في الأعلى لتوضيح محتواه." },
+            { question: "When you insert a shape to the slide, it appears automatically.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: بعد اختيار الشكل، يجب أن تقوم برسمه على الشريحة بالنقر والسحب." },
+            { question: "One of the printing colors available to print the presentation file is to print in blue only.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: خيارات الطباعة هي 'ملون' أو 'تدرج الرمادي' أو 'أبيض وأسود خالص'." },
+            { question: "To change the color of the SmartArt graphic:", answers: [{ text: "Use the Format tab", correct: true }, { text: "Use the Design tab", correct: false }, { text: "Double-click on it", correct: false }], explanation: "التفسير: تبويب 'تنسيق' السياقي يسمح بتعديل ألوان الأجزاء الفردية من رسم SmartArt." },
+            { question: "To add an ....... in a SmartArt graphic, right-click on the shape and choose 'Add Shape'.", answers: [{ text: "additional shape", correct: true }, { text: "new slide", correct: false }, { text: "hyperlink", correct: false }], explanation: "التفسير: النقر بزر الماوس الأيمن على شكل موجود يوفر قائمة بها خيار 'إضافة شكل'." },
+            { question: "Slide transition is the visual effect that occurs when moving from one slide to another.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذا هو تعريف الانتقال. أما الحركة (Animation) فهي تأثير على عنصر داخل الشريحة." },
+            { question: "To add 3D effects to the shape, click on format and shape effect.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: قائمة 'تأثيرات الأشكال' في تبويب 'تنسيق الشكل' تحتوي على خيارات ثلاثية الأبعاد." },
+            { question: "The background of the current slide can be filled with an image from your computer or an image downloaded from the internet.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: جزء 'تنسيق الخلفية' يحتوي على خيار 'تعبئة صورة أو مادة'." },
+            { question: "You can insert multiple icons at the same time.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: نافذة 'إدراج أيقونات' تسمح بتحديد عدة أيقونات قبل إدراجها دفعة واحدة." },
+            { question: "Click on ... to add WordArt.", answers: [{ text: "Insert", correct: true }, { text: "Design", correct: false }, { text: "Home", correct: false }], explanation: "التفسير: WordArt هو كائن نصي مزخرف، ويتم إدراجه من تبويب 'إدراج'." },
+            { question: "You can apply background formatting from the ... tab.", answers: [{ text: "Design", correct: true }, { text: "View", correct: false }, { text: "File", correct: false }], explanation: "التفسير: الخلفيات جزء أساسي من التصميم، لذلك توجد أدواتها في تبويب 'تصميم'." },
+            { question: "To trim the edge of media, click on 'Trim Video' from the ... tab.", answers: [{ text: "Playback", correct: true }, { text: "Format", correct: false }, { text: "Animations", correct: false }], explanation: "التفسير: أدوات تحرير الفيديو، بما في ذلك القص، توجد في تبويب 'تشغيل' الذي يظهر عند تحديد الفيديو." },
+            { question: "To change the order of shapes in a SmartArt graphic, Click Ctrl + T on your keyboard.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: يتم تغيير الترتيب باستخدام أزرار 'نقل لأعلى/لأسفل' في تبويب 'تصميم SmartArt'." },
+            { question: "To open a previously saved presentation file, we press the keys Ctrl + O.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: Ctrl + O هو اختصار قياسي لفتح الملفات في معظم البرامج." },
+            { question: "One of the most common types of Picture formats used in online presentations is GIF.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: بينما JPEG و PNG أكثر شيوعًا للصور الثابتة، فإن GIF يستخدم بكثرة للرسوم المتحركة البسيطة." },
+            { question: "The purpose of The Table Design Tab in PowerPoint is to...", answers: [{ text: "Customize table formatting", correct: true }, { text: "Insert rows and columns", correct: false }, { text: "Merge cells", correct: false }], explanation: "التفسير: هذا التبويب مخصص للمظهر المرئي للجدول مثل الأنماط، التظليل، والحدود." },
+            { question: "This layout contains the main title and subtitle...", answers: [{ text: "Title Slide", correct: true }, { text: "Title and Content", correct: false }, { text: "Blank", correct: false }], explanation: "التفسير: تخطيط 'شريحة العنوان' مصمم خصيصًا للشريحة الافتتاحية." },
+            { question: "You can use ...... to delete the border between table cells.", answers: [{ text: "Eraser", correct: true }, { text: "Pen", correct: false }, { text: "Selection tool", correct: false }], explanation: "التفسير: أداة 'الممحاة' في تبويب تصميم الجدول تسمح بإزالة الحدود بالنقر عليها." },
+            { question: "The text you add becomes part of the shape and if you rotate the shape the text will also rotate.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: النص داخل الشكل يرتبط بخصائص الشكل، بما في ذلك الدوران." },
+            { question: "To add graphs, click...", answers: [{ text: "Insert and then chart", correct: true }, { text: "Design and then chart", correct: false }, { text: "Data and then chart", correct: false }], explanation: "التفسير: المخططات (الرسوم البيانية) يتم إدراجها من تبويب 'إدراج'." },
+            { question: "The best practice for using pictures in a presentation to ensure audience appeal is to avoid pictures.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الصور أداة مرئية قوية، والممارسة الأفضل هي استخدامها بفعالية وليس تجنبها." },
+            { question: "The best practice for using pictures in a presentation to ensure audience appeal is to avoid too many pictures.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: كثرة الصور في شريحة واحدة يمكن أن تشتت الانتباه وتجعلها مزدحمة." },
+            { question: "It is best to avoid mixing drawn images with photographs.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: الحفاظ على نمط مرئي متسق يجعل العرض يبدو أكثر احترافية." },
+            { question: "The shape outline on the Home tab is in the ... group.", answers: [{ text: "Drawing", correct: true }, { text: "Font", correct: false }, { text: "Paragraph", correct: false }], explanation: "التفسير: تبويب الشريط الرئيسي يحتوي على مجموعة 'رسم' بها أدوات أساسية للأشكال." },
+            { question: "... is used to navigate from the current page to another Web Site or File.", answers: [{ text: "Hyperlink", correct: true }, { text: "Bookmark", correct: false }, { text: "Comment", correct: false }], explanation: "التفسير: هذا هو تعريف الارتباط التشعبي (Hyperlink)." },
+            { question: "If you want to add a comment about a chart you can use a...", answers: [{ text: "Text box", correct: true }, { text: "Caption", correct: false }, { text: "Footer", correct: false }], explanation: "التفسير: مربع النص هو أداة مرنة لإضافة أي نص إضافي في أي مكان على الشريحة." },
+            { question: "To change the table style, we click Table Tools/Design tab, then select the table style you want.", answers: [{ text: "True", correct: true }, { text: "False", correct: false }], explanation: "التفسير: هذه هي الخطوات الدقيقة لتغيير نمط الجدول باستخدام الأدوات السياقية." }
         ];
 
         // --- DOM ELEMENTS ---
@@ -181,11 +206,15 @@
         const startBtn = document.getElementById('start-btn');
         const nextBtn = document.getElementById('next-btn');
         const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
 
         const questionNumberEl = document.getElementById('question-number');
         const questionTextEl = document.getElementById('question-text');
         const answerButtonsEl = document.getElementById('answer-buttons');
         const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
         const scoreTextEl = document.getElementById('score-text');
         const timerEl = document.getElementById('timer');
 
@@ -193,6 +222,8 @@
         let currentQuestionIndex;
         let score;
         let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
 
         // --- EVENT LISTENERS ---
         startBtn.addEventListener('click', startQuiz);
@@ -200,12 +231,39 @@
             currentQuestionIndex++;
             setNextQuestion();
         });
-        restartBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
 
         // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
         function startQuiz() {
             currentQuestionIndex = 0;
             score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
 
             startScreen.classList.add('hidden');
             resultsScreen.classList.add('hidden');
@@ -237,8 +295,8 @@
 
         function setNextQuestion() {
             resetState();
-            if (currentQuestionIndex < questions.length) {
-                showQuestion(questions[currentQuestionIndex]);
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
             } else {
                 showResults();
             }
@@ -247,10 +305,16 @@
         function showQuestion(question) {
             questionNumberEl.innerText = currentQuestionIndex + 1;
             questionTextEl.innerText = question.question;
-            question.answers.forEach(answer => {
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
                 const button = document.createElement('button');
                 button.innerText = answer.text;
-                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-left', 'answer-btn');
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-right', 'answer-btn');
                 if (answer.correct) {
                     button.dataset.correct = answer.correct;
                 }
@@ -262,6 +326,8 @@
         function resetState() {
             nextBtn.classList.add('hidden');
             feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
             while (answerButtonsEl.firstChild) {
                 answerButtonsEl.removeChild(answerButtonsEl.firstChild);
             }
@@ -274,26 +340,31 @@
             if (isCorrect) {
                 score++;
                 selectedBtn.classList.add('correct');
-                feedbackEl.innerText = "Correct!";
+                feedbackEl.innerText = "صحيح!";
                 feedbackEl.style.color = '#16a34a';
             } else {
                 selectedBtn.classList.add('incorrect');
-                feedbackEl.innerText = "Sorry, that's not right.";
+                feedbackEl.innerText = "للأسف، إجابة خاطئة.";
                 feedbackEl.style.color = '#dc2626';
             }
 
-            // Show the correct answer
             Array.from(answerButtonsEl.children).forEach(button => {
                 if (button.dataset.correct === 'true') {
                     button.classList.add('correct');
                 }
-                button.disabled = true; // Disable all buttons
+                button.disabled = true;
             });
 
-            if (questions.length > currentQuestionIndex + 1) {
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
                 nextBtn.classList.remove('hidden');
             } else {
-                nextBtn.innerText = 'Show Results';
+                nextBtn.innerText = 'عرض النتائج';
                 nextBtn.classList.remove('hidden');
             }
         }
@@ -302,8 +373,8 @@
             clearInterval(timerInterval);
             quizScreen.classList.add('hidden');
             resultsScreen.classList.remove('hidden');
-            scoreTextEl.innerText = `${score} / ${questions.length}`;
-            nextBtn.innerText = 'Next Question';
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'السؤال التالي';
         }
 
     </script>
