@@ -65,7 +65,7 @@
         <!-- Start Screen -->
         <div id="start-screen" class="text-center">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">اختبار مهارات Word</h1>
-            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 68 سؤالاً. لديك 25 دقيقة.</p>
+            <p class="text-gray-600 mb-4">اختبر معلوماتك مع 76 سؤالاً. لديك 25 دقيقة.</p>
 
             <div class="mb-6">
                 <p class="text-gray-700 font-semibold mb-3">اختر ترتيب الأسئلة:</p>
@@ -86,7 +86,7 @@
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/68</h2>
+                <h2 class="text-xl font-bold text-indigo-600">سؤال <span id="question-number"></span>/76</h2>
                 <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
                 </div>
             </div>
@@ -198,7 +198,15 @@
             { question: "The document saves with extinction HMT for display on the Web.", answers: [{ text: "True", correct: false }, { text: "False", correct: true }], explanation: "التفسير: الامتداد الصحيح لصفحات الويب هو .html أو .htm." },
             { question: "To add an additional shape in a SmartArt graphic ...", answers: [{ text: "Right-click on the shape and choose 'Add Shape'", correct: true }, { text: "Insert -> New Shape", correct: false }, { text: "Format -> Add Shape", correct: false }], explanation: "التفسير: قائمة النقر بزر الماوس الأيمن على شكل موجود هي أسرع طريقة لإضافة شكل جديد." },
             { question: "The position of images in the document is determined by the group ....", answers: [{ text: "Arrange", correct: true }, { text: "Illustrations", correct: false }, { text: "Picture Styles", correct: false }], explanation: "التفسير: مجموعة 'ترتيب' (Arrange) في تبويب 'تنسيق الصورة' تحتوي على أدوات مثل 'الموضع' و 'التفاف النص' للتحكم في مكان الصورة." },
-            { question: "To view the origin of the merged fields, we choose ...", answers: [{ text: "Highlight fields", correct: true }, { text: "Preview Results", correct: false }, { text: "Address Block", correct: false }], explanation: "التفسير: خيار 'تمييز حقول الدمج' (Highlight Merge Fields) يظلل الحقول التي سيتم استبدالها ببيانات من المصدر." }
+            { question: "To view the origin of the merged fields, we choose ...", answers: [{ text: "Highlight fields", correct: true }, { text: "Preview Results", correct: false }, { text: "Address Block", correct: false }], explanation: "التفسير: خيار 'تمييز حقول الدمج' (Highlight Merge Fields) يظلل الحقول التي سيتم استبدالها ببيانات من المصدر." },
+            { question: " The correct shortcut to make text bold is ... ", answers: [{ text: "Ctrl + B", correct: true }, { text: "Ctrl + Shift + B", correct: false }, { text: "Ctrl + Alt + B", correct: false }], explanation: "The correct shortcut to make text bold is Ctrl + B." },
+            { question: "The correct shortcut to make text italic is ...", answers: [{ text: "Ctrl + I", correct: true }, { text: "Ctrl + Shift + I", correct: false }, { text: "Ctrl + Alt + I", correct: false }], explanation: "The correct shortcut to make text italic is Ctrl + I." },
+            { question: "The correct shortcut to make text underlined is ...", answers: [{ text: "Ctrl + U", correct: true }, { text: "Ctrl + Shift + U", correct: false }, { text: "Ctrl + Alt + U", correct: false }], explanation: "The correct shortcut to make text underlined is Ctrl + U." },
+            { question: "The correct shortcut to retuen to previous ...", answers: [{ text: "Ctrl + Z", correct: true }, { text: "Ctrl + Shift + Z", correct: false }, { text: "Ctrl + Alt + Z", correct: false }], explanation: "The correct shortcut to retuen to previous is Ctrl + Z." },
+            { question: "The correct shortcut to replace a word is ...", answers: [{ text: "Ctrl + H", correct: true }, { text: "Ctrl + Shift + H", correct: false }, { text: "Ctrl + Alt + H", correct: false }], explanation: "The correct shortcut to replace a word is Ctrl + H." },
+            { question: "The correct shortcut to paste text is ...", answers: [{ text: "Ctrl + V", correct: true }, { text: "Ctrl + Shift + V", correct: false }, { text: "Ctrl + Alt + V", correct: false }], explanation: "The correct shortcut to paste text is Ctrl + V." },
+            { question: "The correct shortcut to copy text is ...", answers: [{ text: "Ctrl + C", correct: true }, { text: "Ctrl + Shift + C", correct: false }, { text: "Ctrl + Alt + C", correct: false }], explanation: "The correct shortcut to copy text is Ctrl + C." },
+            { question: "The correct shortcut to  search for a word is ...", answers: [{ text: "Ctrl + F", correct: true }, { text: "Ctrl + Shift + F", correct: false }, { text: "Ctrl + Alt + F", correct: false }], explanation: "The correct shortcut to search for a word is Ctrl + F4" }
         ];
         console.log(questions.length);
         // --- DOM ELEMENTS ---
