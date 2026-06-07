@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Search Quiz</title>
+    <title>Networks Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,8 +64,8 @@
 
         <!-- Start Screen -->
         <div id="start-screen" class="text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Web Search Skills Quiz</h1>
-            <p class="text-gray-600 mb-4">Test your knowledge with 32 questions. You have 25 minutes.</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Networks Quiz</h1>
+            <p class="text-gray-600 mb-4">Test your knowledge with 30 questions. You have 25 minutes.</p>
 
             <div class="mb-6">
                 <p class="text-gray-700 font-semibold mb-3">Choose Question Order:</p>
@@ -87,7 +87,7 @@
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/32</h2>
+                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/30</h2>
                 <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
                 </div>
             </div>
@@ -114,7 +114,7 @@
 
         <!-- Results Screen -->
         <div id="results-screen" class="hidden text-center">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Networks Quiz</h1>
             <p class="text-gray-600 mb-6">Here's your result:</p>
             <div class="bg-indigo-100 p-6 rounded-xl mb-6">
                 <p class="text-lg text-gray-700">Your Score:</p>
@@ -131,37 +131,35 @@
     <script>
         // --- QUIZ DATA ---
         const questions = [
-            { question: "Secure shopping websites and e-stores start with the website domain HTTP.   (HTTPS).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: Secure sites that encrypt data start with HTTPS. The " },
-            { question: "The journal's impact factor is based on calculating the number of times articles are searched for during a given year in the journal. (citations or articles coming from it).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: الا ستشهادات أو المقالات الواردة منها" },
-            { question: "Using the Google search engine, if you want to know who cited a Washington Post article on their site the correct structure of the search sentence?", answers: [{text: "com", correct: true}], explanation: "Explanation: The `link:` operator in Google Search finds pages that link to a specific domain or URL." },
-            { question: "The words you type in a search field to get your results are called …", answers: [{text: "Search terms", correct: true}, {text: "Keywords", correct: false}, {text: "Queries", correct: false}], explanation: "Explanation: " },
-            { question: "The Database … enables you to merge more than one account of the same author.", answers: [{text: "Scopus", correct: true}, {text: "Web of Science", correct: false}, {text: "ProQuest", correct: false}], explanation: "Explanation: Scopus provides an " },
-            { question: "The Egyptian Knowledge Bank (EKB) offers a range of online workshops.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: The EKB regularly hosts webinars and workshops to train users on how to effectively use its various resources." },
-            { question: "Boolean operations cannot be used when searching within a ProQuest database.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: Boolean operators (AND, OR, NOT) are fundamental search tools supported by almost all academic databases, including ProQuest." },
-            { question: "Scopus sources are accessed through the ELSEVIER database.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: Scopus is a product of the publisher Elsevier, and it is one of their flagship database services." },
-            { question: "The user can access Clarivate from the Sources menu in the Egyptian Knowledge Bank.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: Clarivate, which owns Web of Science, is one of the major publishers and resources available through the EKB portal." },
+            { question: "Used as a port to connect high-definition TVs.", answers: [{text: "HDMI", correct: true}, {text: "VGA", correct: false}, {text: "USB", correct: false}] },
+            { question: "The DHCP protocol uses a static IP address for the client device. (Dynamic).", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "VGA port used in displays with high-resolution image quality.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: تقل جودة الصورة" },
+            { question: "Leased lines are the best option for Individuals who require speed and high reliability.     (large companies, institutions and universities)?", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "Each octet of an IP address can hold ... value.", answers: [{text: "256", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "What is the used address to connect to an Ethernet network?", answers: [{text: "MAC address", correct: true}, {text: "IP address", correct: false}, {text: "DNS address", correct: false}] },
+            { question: "UDP protocol is responsible for accuracy and ensuring that the statement arrives correctly.     (TCP).", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "The network access layer defines the physical communication methods with the local network.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Windows platform is considered a type of … cloud.", answers: [{text: "Public", correct: true}, {text: "Private", correct: false}, {text: "Hybrid", correct: false}] },
+            { question: "Peer-to-peer networks require a server device with special specifications to provide the required service to other devices. (Client- Server).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: الخادم - العميل" },
+            { question: "The central focal point of the star structure is the …", answers: [{text: "Switch", correct: true}, {text: "Router", correct: false}, {text: "Hub", correct: false}] },
+            { question: "Connecting devices are used to translate digital data into electrical signals . (Network Interface Card).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: بطاقة الشبكة" },
             { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
-            { question: "SCImago displays SCOPUS metrics for a journal according  a year.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: The SCImago Journal Rank (SJR) portal uses data from the Scopus database to provide its journal metrics and rankings." },
-            { question: "The search engine comprehensively scans the network to obtain results when you enter search words.             (indexes).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: الفهارس وليس الشبكة بشكل كامل" },
-            { question: "The website … allows you to use EndNote Online for free.", answers: [{text: "Clarivate", correct: true}, {text: "Elsevier", correct: false}, {text: "EBSCO", correct: false}], explanation: "Explanation: EndNote is a reference management software owned by Clarivate, and access is often provided through institutional subscriptions like Web of Science." },
-            { question: "Using Google, if you want to find a website similar to eBay, what is the correct syntax for your search term?", answers: [{text: "com", correct: true}], explanation: "Explanation: The `related:` operator is a Google search command used to find websites that are similar to a given URL." },
-            { question: "Dar Al-Mandumah's index contains a group of subsections.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
-            { question: "The document can be saved for viewing on the web with the HMT extension. (html).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: The correct file extensions for web pages are .html or .htm." },
-            { question: "Use advanced search to ..... your results.", answers: [{text: "Narrow", correct: true}, {text: "Expand", correct: false}, {text: "Summarize", correct: false}], explanation: "Explanation: Advanced search is designed to add more specific criteria (like date, author, or publication) to narrow down the search and get more relevant results." },
-            { question: "The data source in SCImago is.", answers: [{text: "Scopus", correct: true}, {text: "Web of Science", correct: false}, {text: "Google Scholar", correct: false}], explanation: "Explanation: SCImago is a portal that visualizes and analyzes data drawn exclusively from the Scopus database." },
-            { question: "Advanced search in WOS is used to narrow your search according to specific criteria.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: Web of Science (WOS) provides advanced search features to help researchers pinpoint specific articles by adding multiple search fields and criteria." },
-            { question: "Use... to expand your search.", answers: [{text: "OR", correct: true}, {text: "AND", correct: false}, {text: "NOT", correct: false}], explanation: "Explanation: The Boolean operator OR is used to find results that contain either of the search terms, thus broadening the search." },
-            { question: "SJR enables you to arrange journals in your field and filter them by topic, but it is difficult to classify them by year.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: The SCImago Journal Rank (SJR) portal allows for easy filtering and classification by year, subject area, and other criteria." },
-            { question: "The Scopus database is a powerful tool if you want to compare journals in the same subject category.      (IF).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: معامل تأثتر المجلة" },
-            { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
-            { question: "refers to the technical "gateway" used to access resources on a web server.", answers: [{text: "Port", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
-            { question: "Using a hyphen (-) when searching on Google leads to reducing the search results.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: The hyphen (-) acts as a NOT operator, excluding any results that contain the word immediately following it, thus narrowing the results." },
-            { question: "An indicator that is considered a measure of the scientific influence of scientific journals that explains the status of the journals from which citations come is …", answers: [{text: "SCIMAGO Journal Rank", correct: true}, {text: "Impact Factor", correct: false}, {text: "H-index", correct: false}], explanation: "Explanation: The SCImago Journal Rank (SJR) is a metric that measures a journal" },
-            { question: "You can use OneDrive as a cloud drive within tab …", answers: [{text: "App launcher icon", correct: true}, {text: "Home tab", correct: false}, {text: "View tab", correct: false}], explanation: "Explanation: In online Microsoft 365 services, the app launcher (the icon with nine dots) is used to switch between different applications like Outlook, Word, and OneDrive." },
-            { question: "The…platform is the product of cooperation between the Al-Alfi Foundation for Human and Social Development, the Ministry of Higher Education.", answers: [{text: "Ejada", correct: true}, {text: "EKB", correct: false}, {text: "Thales", correct: false}], explanation: "Explanation: Ejada is a specific educational platform resulting from this collaboration in Egypt." },
-            { question: "When you click on the name of the magazine or periodical in WOS, the impact factor of the magazine or periodical is displayed.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: Clicking on a journal" },
-            { question: "The Arabic Index for reference Citations enables you to write search terms in Arabic only.                (Arabic and English).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: Most modern databases, including those for Arabic content, support searching in both Arabic and English to maximize results." },
-            { question: "All Photos posted on Unsplash are free to copy, modify distribute including for commercial purposes.", answers: [{text: "True", correct: true}, {text: "False", correct: false}], explanation: "Explanation: This describes the Unsplash license, which is very permissive and allows for wide use of the images on their platform." },
+            { question: "Open-source operating system widely used for servers and networks.", answers: [{text: "Linux", correct: true}, {text: "Windows", correct: false}, {text: "macOS", correct: false}] },
+            { question: "The IP address consists of.", answers: [{text: "Four octets", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "The hub is more commonly used than the switch collector.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: أقل" },
+            { question: "Amazon AWS is considered one of the most famous online software providers.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: البنية التحتية IaaS" },
+            { question: "The IP address of the device must be in the same subnet as the local network.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "The IP protocol is a link layer protocol.    (Ethernet).", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "... Used to transmit data over electromagnetic waves.", answers: [{text: "Wireless Communications", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "", answers: [{text: "Helps in managing and maintaining the network Wireshark", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "The company .. developed the Network File System (NFS).", answers: [{text: "Sun Microsystems", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "The coaxial cable consists of five parts to reduce signal interface. (Four).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: أربعة" },
+            { question: "The collector is used to form the star structure of the grid. (Hub or Switch or Router.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "The central connection point connects devices to form the star structure of the grid.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "When using DSL For internet connection the internet speed remains constant for customer.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "When using DSL For internet connection the internet speed remains constant by customer.  (For).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: بواسطة مزود الخدمة للعميل" },
+            { question: "Cross-Connection is used to connect devices of the same type.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Crossover Cable used to connect similar devices.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
             { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
         ];
 

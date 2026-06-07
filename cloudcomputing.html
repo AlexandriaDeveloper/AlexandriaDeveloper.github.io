@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Computing Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .answer-btn {
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .answer-btn.correct {
+            background-color: #16a34a;
+            /* green-600 */
+            border-color: #15803d;
+            /* green-700 */
+            color: white;
+        }
+
+        .answer-btn.incorrect {
+            background-color: #dc2626;
+            /* red-600 */
+            border-color: #b91c1c;
+            /* red-700 */
+            color: white;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background-color: #f3f4f6;
+            /* gray-100 */
+        }
+
+        .order-btn.selected {
+            background-color: #4f46e5;
+            /* indigo-600 */
+            color: white;
+            border-color: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="quiz-container" class="quiz-container w-full bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Cloud Computing Quiz</h1>
+            <p class="text-gray-600 mb-4">Test your knowledge with 59 questions. You have 25 minutes.</p>
+
+            <div class="mb-6">
+                <p class="text-gray-700 font-semibold mb-3">Choose Question Order:</p>
+                <div class="flex justify-center gap-4">
+                    <button id="order-in-order"
+                        class="order-btn selected flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">In
+                        Order</button>
+                    <button id="order-random"
+                        class="order-btn flex-1 border border-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">Random</button>
+                </div>
+            </div>
+
+            <button id="start-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Start Quiz
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-indigo-600">Question <span id="question-number"></span>/59</h2>
+                <div id="timer" class="text-lg font-semibold bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg">25:00
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <p id="question-text" class="text-xl font-medium text-gray-900 leading-relaxed"></p>
+            </div>
+
+            <div id="answer-buttons" class="grid grid-cols-1 gap-4">
+                <!-- Answer buttons will be inserted here by JS -->
+            </div>
+
+            <div id="feedback" class="mt-4 text-center font-medium"></div>
+
+            <div id="explanation-container" class="hidden mt-4 text-center">
+                <p id="explanation-text" class="text-sm text-gray-700 bg-gray-100 p-3 rounded-lg"></p>
+            </div>
+
+            <button id="next-btn"
+                class="hidden w-full mt-6 bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-colors duration-300">
+                Next Question
+            </button>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Cloud Computing Quiz</h1>
+            <p class="text-gray-600 mb-6">Here's your result:</p>
+            <div class="bg-indigo-100 p-6 rounded-xl mb-6">
+                <p class="text-lg text-gray-700">Your Score:</p>
+                <p id="score-text" class="text-5xl font-bold text-indigo-600"></p>
+            </div>
+            <button id="restart-btn"
+                class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-lg">
+                Restart Quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const questions = [
+            { question: "Share files in one drive from file explorer.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "edit name of file of google drawing from.", answers: [{text: "File", correct: true}, {text: "Home", correct: false}, {text: "Insert", correct: false}] },
+            { question: "We could add e-mail address to google contacts.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Cloud based PowerPoint differs from desktop one in that it couldn't apply a unified design to all.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Cloud based presentation (work) previously made can be opened from any device, by web browser. (log in to your Microsoft account).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: تسجيل الدخول إلى حسابك على ميكروسوفت" },
+            { question: "Sway is a new app from Microsoft used to share personal presentations, files. (to create interactive reports and presentations, form to create forms for opinion polls, data collection, or other tasks, and Quiz to create electronic test forms) Sway.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: لإنشاء تقارير وعروض تقديمية تفاعلية ونماذج واستمارات لعمل استطلاعات الرأي او جمع بيانات أو نماذج اختبارات الكترونية" },
+            { question: "Sway is Microsoft service used to create online prescription. (presentations) Sway.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: عروض تقديمية" },
+            { question: "Sway is Microsoft service used to create online presentations. Sway.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Canva. is considered one of the cloud services in the field of design.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "… button to open a last worked file of Canva.", answers: [{text: "Projects", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "We could share a video from google photos.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "We could edit the name of file of google drawing from …", answers: [{text: "Untitled drawing", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Storage size of google drive is 25 gigabytes.    (15).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: 15" },
+            { question: "It allows  ... access to the tools required to build and manage mobile applications via the web without entering into or maintaining the infrastructure.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Artificial intelligence is …", answers: [{text: "Platform as a service", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "All of the following are cloud computing services except …", answers: [{text: "Cisco", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "We could export contact on google as …", answers: [{text: "CSV", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "When you log in to One Drive with a work or educational institution account, the items in your account will be deleted Recycle Bin automatically after …", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "days.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Cloud computing enables access to computing resources solely via the internet.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Google Apps is considered  …", answers: [{text: "SaaS", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Zendesk is a cloud computing program that provides Paas. (SaaS).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: SaaS" },
+            { question: "Add a photo album to the Google photo service, click on …", answers: [{text: "Import", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "The cloud backend consists of … layers.", answers: [{text: "6", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Alibaba is a cloud service.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Digital transformation involves the integration of digital technology across all aspects of a business.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Excel Online lacks a Data tab for.", answers: [{text: "importing data from databases", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "You can search for anything you want through File Explorer. (Google photos or Internet Browser).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: صور جوجل أو متصفح الإنترنت" },
+            { question: "You can search for anything you want in your Google Photos, such as bags, for example.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "You can search for a bag Photo  in Google Photos service by typing.", answers: [{text: "bag", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "You can add photo to contact through pressing …", answers: [{text: "Add photo", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Google storage is divided equally between Gmail, Google Drive, and Google Photo.  (Share storage).", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "The Heroku platform is a type of cloud computing that provides its services in the form of SaaS.          (PaaS).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: PaaS" },
+            { question: "Cloud computing contains  ... basic components.", answers: [{text: "3", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "you can create a unified design for the entire presentation using Master Slides, in the …… version of PowerPoint.", answers: [{text: "PowerPoint Desktop", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "A Microsoft account enables you to work on more specialized programs such as Sway to create interactive reports and presentations.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "You can get access to your stored projects list on Canva through pressing …", answers: [{text: "Projects", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Salesforce is a cloud computing software that provides a PaaS service. (SaaS).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: SaaS" },
+            { question: "Represents  ....  the cloud layer of users.", answers: [{text: "The front end", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}], explanation: "Explanation: face" },
+            { question: "You can get images from Google Drawings as a PDF file.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "In desktop PowerPoint you can create a unified design for the entire presentation using Master Slides, but this is not available in the cloud version of PowerPoint.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "The Heroku platform allows work teams to participate in preparing software projects without having to be in the same place.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "OneDrive comes pre-installed on Windows 7.    (10) OneDrive.", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: 10" },
+            { question: "you can create a unified design for the entire presentation using Master Slides, in the cloud version of PowerPoint . (desktop).", answers: [{text: "True", correct: false}, {text: "False", correct: true}] },
+            { question: "Print is improved now where you can print full-page slides, slides with notes, or handouts with three slides per page by PowerPoint Online?", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "Free Microsoft OneDrive storage.", answers: [{text: "OneDrive 5 GB", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Previously, PowerPoint Online was used to let you print many slides per page, including headers and footers.  (only one).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: واحدة فقط" },
+            { question: "- June - 2026 (.", answers: [{text: "", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "To restore an older version of a file in OneDrive you can use version history. Right-click on the file and choose …", answers: [{text: "Version History", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Which cloud service provider is known for its extensive suite of tools to support digital transformation?", answers: [{text: "Microsoft Azure", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "To rename the Google Drawings file, you can press the text area "Untitled drawing", then press "Enter" in your keyboard.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "You can back up Photos, videos, and screenshots to OneDrive automatically, through the settings by clicking on.", answers: [{text: "Manage Backup", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+            { question: "Auto-save feature for photo, video, and screenshot folders automatically backs up files if you have an Internet connection and there is storage space in your OneDrive account.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "You can automatically save images and videos to your Google account by enabling backup.", answers: [{text: "True", correct: true}, {text: "False", correct: false}] },
+            { question: "You can create a drawing using Google Drive.  (Drawings).", answers: [{text: "True", correct: false}, {text: "False", correct: true}], explanation: "Explanation: إنجلتر ي" },
+            { question: "- June - 2026 (.", answers: [{text: "com/Hsl9oziiV77DxFtnykupUq", correct: true}, {text: "Option B", correct: false}, {text: "Option C", correct: false}] },
+        ];
+
+        // --- DOM ELEMENTS ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const orderInOrderBtn = document.getElementById('order-in-order');
+        const orderRandomBtn = document.getElementById('order-random');
+
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const feedbackEl = document.getElementById('feedback');
+        const explanationContainer = document.getElementById('explanation-container');
+        const explanationText = document.getElementById('explanation-text');
+        const scoreTextEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer');
+
+        // --- QUIZ STATE ---
+        let currentQuestionIndex;
+        let score;
+        let timerInterval;
+        let quizOrder = 'in-order'; // 'in-order' or 'random'
+        let quizQuestions = [];
+
+        // --- EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            setNextQuestion();
+        });
+        restartBtn.addEventListener('click', () => {
+            resultsScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        orderInOrderBtn.addEventListener('click', () => {
+            quizOrder = 'in-order';
+            orderInOrderBtn.classList.add('selected');
+            orderRandomBtn.classList.remove('selected');
+        });
+        orderRandomBtn.addEventListener('click', () => {
+            quizOrder = 'random';
+            orderRandomBtn.classList.add('selected');
+            orderInOrderBtn.classList.remove('selected');
+        });
+
+        // --- FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (quizOrder === 'random') {
+                quizQuestions = [...questions];
+                shuffleArray(quizQuestions);
+            } else {
+                quizQuestions = [...questions];
+            }
+
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+
+            startTimer();
+            setNextQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 25 * 60; // 25 minutes in seconds
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(time / 60);
+                let seconds = time % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                timerEl.textContent = `${minutes}:${seconds}`;
+                time--;
+
+                if (time < 0) {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion(quizQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showQuestion(question) {
+            questionNumberEl.innerText = currentQuestionIndex + 1;
+            questionTextEl.innerText = question.question;
+
+            let answers = [...question.answers];
+            if (quizOrder === 'random') {
+                shuffleArray(answers);
+            }
+
+            answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('w-full', 'border', 'border-gray-300', 'text-gray-700', 'font-semibold', 'py-3', 'px-4', 'rounded-lg', 'text-left', 'answer-btn');
+                if (answer.correct) {
+                    button.dataset.correct = answer.correct;
+                }
+                button.addEventListener('click', selectAnswer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            nextBtn.classList.add('hidden');
+            feedbackEl.innerText = '';
+            explanationContainer.classList.add('hidden');
+            explanationText.innerText = '';
+            while (answerButtonsEl.firstChild) {
+                answerButtonsEl.removeChild(answerButtonsEl.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = e.target;
+            const isCorrect = selectedBtn.dataset.correct === 'true';
+
+            if (isCorrect) {
+                score++;
+                selectedBtn.classList.add('correct');
+                feedbackEl.innerText = "Correct!";
+                feedbackEl.style.color = '#16a34a';
+            } else {
+                selectedBtn.classList.add('incorrect');
+                feedbackEl.innerText = "Sorry, that's not right.";
+                feedbackEl.style.color = '#dc2626';
+            }
+
+            Array.from(answerButtonsEl.children).forEach(button => {
+                if (button.dataset.correct === 'true') {
+                    button.classList.add('correct');
+                }
+                button.disabled = true;
+            });
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            if (currentQuestion.explanation) {
+                explanationText.innerText = currentQuestion.explanation;
+                explanationContainer.classList.remove('hidden');
+            }
+
+            if (quizQuestions.length > currentQuestionIndex + 1) {
+                nextBtn.classList.remove('hidden');
+            } else {
+                nextBtn.innerText = 'Show Results';
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        function showResults() {
+            clearInterval(timerInterval);
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            scoreTextEl.innerText = `${score} / ${quizQuestions.length}`;
+            nextBtn.innerText = 'Next Question';
+        }
+
+    </script>
+</body>
+
+</html>
